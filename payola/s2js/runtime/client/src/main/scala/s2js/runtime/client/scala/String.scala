@@ -26,4 +26,14 @@ class String
 
     @javascript("var regexp = new RegExp(pattern); return regexp.test(self);")
     def matches(pattern: String): Boolean = false
+
+    @javascript("""
+        var escapedToReplace = self.escapeRegExp(toReplace);
+        var escapedReplaceWith = self.escapeRegExp(replaceWith);
+        return self.replace(new RegExp(escapedToReplace, 'g'), escapedReplaceWith);
+    """)
+    def replaceAll(toReplace: String, replaceWith: String): String = null
+
+    @javascript(""" return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\^\$\|\\]/g, "\\$&"); """)
+    def escapeRegExp(str: String): String = null
 }

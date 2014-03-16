@@ -167,6 +167,16 @@ input[type="checkbox"].active:after {
     background-position: 0px !important;
 }
 
+.icon-play-back {
+    background-image: url(play-back.png) !important;
+    background-position: 0px !important;
+}
+
+.icon-play-back.icon-white {
+    background-image: url(play-back-white.png) !important;
+    background-position: 0px !important;
+}
+
 .icon-group {
     background-image: url(group.png) !important;
     background-position: 0px !important;
@@ -274,6 +284,7 @@ input[type="checkbox"].active:after {
 }
 
 .plugin-message.large {
+    height: 50px;
     padding-top: 150px;
     font-size: 32pt;
     color: #333;
@@ -539,7 +550,7 @@ button.datacube {
     position: relative;
 }
 
-.preview-dialog.modal .modal-body>div{
+.preview-dialog.modal .modal-body > div {
     padding-bottom: 65px;
 }
 
@@ -551,12 +562,12 @@ button.datacube {
     z-index: 1;
 }
 
-.preview-dialog .modal-dialog{
+.preview-dialog .modal-dialog {
     width: 100%;
     margin: 0;
 }
 
-.preview-dialog .connector{
+.preview-dialog .connector {
     margin-left: 47%;
 }
 
@@ -640,8 +651,6 @@ button.datacube {
     background: white;
     margin-top: 5px;
 }
-
-
 
 .form-group label {
     margin: 0;

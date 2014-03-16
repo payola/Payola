@@ -5,7 +5,29 @@ accessibleDataSources: Seq[cz.payola.domain.entities.plugins.DataSource]
 @main(user, "Dashboard :: Payola!") {
 <div class="container-fluid dashboard">
 
-    <div class="breadcrumb">Try visualizing dataset-wide statistics in <a href="http://lodvisualization.appspot.com/">LOD Visualization</a></div>
+    <h3>Featured visualizations</h3>
+    <div class="row">
+        <div class="col-lg-4">
+            <a href="http://vis.payola.cz/ovm-gmaps" class="thumbnail" style="min-height: 300px;">
+                <img src="@routes.Assets.at("img/ovm-gmaps.png")" alt="">
+                <p style="text-align: center"><small>OVM coordinates using Google Geocoder + Type as skos:Concept + uradovny + optional region [GMaps]</small></p>
+            </a>
+        </div>
+        <div class="col-lg-4">
+            <a href="http://vis.payola.cz/coi-treemap" class="thumbnail" style="min-height: 300px;">
+                <img src="@routes.Assets.at("img/coi-treemap.png")" alt="">
+                <p style="text-align: center"><small>COI.CZ inspections and sanctions by regions and sanction value [Treemap]</small></p>
+            </a>
+        </div>
+        <div class="col-lg-4">
+            <a href="http://live.payola.cz/analysis/7b2ee8cc-f03a-4a04-ba9d-e54e65346191#cz_payola_web_client_views_d3_packLayout_PackLayout" class="thumbnail" style="min-height: 300px;">
+                <img src="@routes.Assets.at("img/coi-packed.png")" alt="">
+                <p style="text-align: center"><small>COI.CZ inspections and sanctions by regions and sanction value [PackLayout]</small></p>
+            </a>
+        </div>
+    </div>
+
+    <h3>Dashboard</h3>
 
     <div class="row">
         @tags.dashboardList("Accessible analyses", "analyses", accessibleAnalysis,None,

@@ -13,9 +13,9 @@ import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.presenters.entity.PrefixPresenter
 
-class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier) extends Presenter
+class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None, analysisId: Option[String] = None) extends Presenter
 {
-    val view = new PluginSwitchView(prefixApplier)
+    val view = new PluginSwitchView(prefixApplier, startEvaluationId, analysisId)
 
     private var currentCustomization: Option[DefinedCustomization] = None
 

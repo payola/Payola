@@ -5,13 +5,13 @@ import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 import s2js.adapters.html
+import cz.payola.web.shared.transformators.RdfJsonTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * @author Jiri Helmich
  */
-class ZoomableTreemap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Zoomable Treemap", prefixApplier) {
-
-    def supportedDataFormat: String = "RDF/JSON"
+class ZoomableTreemap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("Zoomable Treemap", prefixApplier) {
 
     val d3Placeholder = new Div(List())
     val placeholder = new Div(List(d3Placeholder))
@@ -193,5 +193,19 @@ class ZoomableTreemap(prefixApplier: Option[PrefixApplier] = None) extends Plugi
         }
         parseJSON(_serializedGraph)
         _rendered = true
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        success() //TODO whe is available????
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
+        RdfJsonTransformator.getCompleteGraph(evaluationId)(updateGraph(_)) //TODO default graph and paginating
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

@@ -16,13 +16,15 @@ import cz.payola.web.client.views.elements.lists.ListItem
 import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
-import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import s2js.compiler.javascript
 import cz.payola.web.client.views.map._
 import cz.payola.web.client.views.map.facets.GroupingMapFacet
+import cz.payola.web.client.views.graph.empty.EmptyPluginView
+import cz.payola.web.client.util.UriHashTools
 import cz.payola.web.client.views.d3.packLayout._
+import cz.payola.web.client.views.datacube.DataCubeVisualizer
 
-class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with ComposedView
+class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None, analysisId: Option[String]) extends GraphView with ComposedView
 {
     /**
      * Event triggered when ontology customization is created.
@@ -62,7 +64,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * List of available visualization plugins.
      */
-    private val plugins = List[PluginView](
+    private val plugins = List[PluginView[_]](
         new TripleTablePluginView(Some(prefixApplier)),
         new SelectResultPluginView(Some(prefixApplier)),
         new CircleTechnique(Some(prefixApplier)),
@@ -78,24 +80,30 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         new PackLayout(Some(prefixApplier)),
         new Sunburst(Some(prefixApplier)),
         new ZoomableSunburst(Some(prefixApplier)),
-        new ZoomableTreemap(Some(prefixApplier))
+        new ZoomableTreemap(Some(prefixApplier)),
+        new DataCubeVisualizer(Some(prefixApplier))
     )
 
     /**
      * Currently used visualization plugin.
      */
-    private var currentPlugin = plugins.head
+    private var currentPlugin: PluginView[_] = getInitialPlugin
+
+    private def getInitialPlugin: PluginView[_] = {
+        if(startEvaluationId.isDefined) {
+            setEvaluationId(startEvaluationId)
+        }
+        plugins.find{ plugin =>
+            evaluationId.isEmpty && normalizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter("viewPlugin")
+        }.getOrElse(new EmptyPluginView())
+    }
 
     /**
      * Parent to the visualization plugin View object.
      */
     private val pluginSpace = new Div(Nil, "plugin-space")
 
-    @javascript(""" return x.replace(/\./g,"_"); """)
-    def replace(x: String): String = ""
-
-    @javascript(""" window.location.hash = hash """)
-    def setLocationHash(hash: String) {}
+    def normalizeClassName(x: String) = x.replaceAll(".", "_")
 
     /**
      * Drop down button for selection of graph visualization.
@@ -103,17 +111,16 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     val pluginChangeButton: DropDownButton = new DropDownButton(List(
         new Icon(Icon.eye_open),
         new Text("Change visualization plugin")),
+        //GoogleMap should not be available for browsing mode
         plugins.map { plugin =>
-            val pluginAnchor = new Anchor(List(new Text(plugin.name)))
-            val listItem = new ListItem(List(pluginAnchor), replace(plugin.getClass.getName))
-            pluginAnchor.mouseClicked += { e =>
-                pluginChangeButton.setActiveItem(listItem)
-                changePlugin(plugin)
-                setLocationHash(replace(plugin.getClass.getName))
-                false
-            }
-            listItem
-        }
+            createPluginSwitchButtonItem(plugin)
+
+        } /*++ plugins.takeRight(1).map { googleMapPlugin =>
+            val pluginAnchor = new Anchor(List(new Text(googleMapPlugin.name))).setAttribute(
+                "title", "Available only in analysis mode").setAttribute("style", "color: black; background-color: white;")
+            val listItem = new ListItem(List(pluginAnchor), normalizeClassName(googleMapPlugin.getClass.getName))
+            listItem //TODO which plugins are not available for browsing???
+        }*/
     )
 
     /**
@@ -134,7 +141,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     /**
      * Toolbar containing pluginChange, customization buttons
      */
-    val toolbar = new Div(List(pluginChangeButton, customizationsButton, languagesButton), "btn-toolbar").setAttribute(
+    val toolbar = new Div(List(pluginChangeButton, customizationsButton), "btn-toolbar").setAttribute(
         "style", "margin-left: 0; margin-top: 15px; margin-bottom: 15px;")
 
     // Re-trigger all events when the corresponding events are triggered in the plugins.
@@ -145,9 +152,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         plugin.vertexBrowsingDataSource += { e => vertexBrowsingDataSource.trigger(createVertexEventArgs(e.vertex))}
     }
 
-    // Display the first plugin.
-    pluginChangeButton.setActiveItem(pluginChangeButton.items.head)
+    // Display the plugin.
     currentPlugin.render(pluginSpace.htmlElement)
+    languagesButton.render(toolbar.htmlElement)
     currentPlugin.renderControls(toolbar.htmlElement)
 
     def createSubViews = List(toolbar, pluginSpace)
@@ -155,6 +162,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
     override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
         super.update(graph, customization, serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.update(graph, customization, serializedGraph)
     }
 
@@ -162,19 +170,27 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
         super.updateGraph(graph, contractLiterals)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.updateGraph(graph, contractLiterals)
+
+        drawGraph()
     }
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
 
         super.updateSerializedGraph(serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
+        currentPlugin.setBrowsingURI(browsingURI)
         currentPlugin.updateSerializedGraph(serializedGraph)
     }
 
     override def updateCustomization(customization: Option[DefinedCustomization]) {
         super.updateCustomization(customization)
         currentPlugin.updateCustomization(customization)
+    }
+
+    override def drawGraph() {
+        currentPlugin.drawGraph()
     }
 
     override def setMainVertex(vertex: Vertex) {
@@ -320,7 +336,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
         listItem
     }
 
-    private def createEmptyCustomization(): ListItem = { //TODO
+    private def createEmptyCustomization(): ListItem = {
         val anchor = new Anchor(List(new Text("Disable customization")))
         val listItem = new ListItem(List(anchor))
 
@@ -337,60 +353,55 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
      * Visualization plugin setter.
      * @param plugin plugin to set
      */
-    private def changePlugin(plugin: PluginView) {
+    private def changePlugin(plugin: PluginView[_]) {
         if (currentPlugin != plugin) {
             // Destroy the current plugin.
             currentPlugin.update(None, None, None)
             currentPlugin.destroyControls()
             currentPlugin.destroy()
+            languagesButton.destroy()
 
             // Switch to the new plugin.
 
             currentPlugin = plugin
             currentPlugin.setEvaluationId(None)
+            currentPlugin.setBrowsingURI(None)
 
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
-                if (currentPlugin.supportedDataFormat == "PayolaObj"){
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResult(evaluationId.get) { g =>
-                        currentGraph = g
-                        currentSerializedGraph = None
-                        update(g, currentCustomization, None)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                        analyticsHit(currentPlugin.name)
-                    } { err => }
-                }else{
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
-                        currentGraph = None
-                        currentSerializedGraph = Some(s)
-                        update(None, currentCustomization, currentSerializedGraph)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                        currentPlugin.drawGraph()
-                        analyticsHit(currentPlugin.name)
-                    }{e => }
-                }
-            } else {
-                if (currentPlugin.supportedDataFormat == "PayolaObj"){
-                    update(currentGraph, currentCustomization, None)
-                    currentSerializedGraph = None
-                    currentPlugin.render(pluginSpace.htmlElement)
+                currentPlugin.setEvaluationId(evaluationId)
+                currentPlugin.setBrowsingURI(browsingURI)
+                currentPlugin.loadDefaultCachedGraph(evaluationId.get, {toUpdate =>
+                    toUpdate match {
+                        case smth: Some[_] =>
+                            smth.get match {
+                                case graph: Graph =>
+                                    currentGraph = Some(graph)
+                                    update(currentGraph, currentCustomization, None)
+
+                                case str: String =>
+                                    currentGraph = None
+                                    currentSerializedGraph = Some(str)
+                                    update(None, currentCustomization, currentSerializedGraph)
+                            }
+                        case _ =>
+                            currentGraph = None
+                            currentSerializedGraph = None
+                            update(None, currentCustomization, None)
+                    }
+                    languagesButton.render(toolbar.htmlElement)
                     currentPlugin.renderControls(toolbar.htmlElement)
-                    currentPlugin.drawGraph()
-                    analyticsHit(currentPlugin.name)
-                }else{
-                    AnalysisEvaluationResultsManager.getCompleteAnalysisResultSerialized(evaluationId.get, currentPlugin.supportedDataFormat){ s =>
-                        currentGraph = None
-                        currentSerializedGraph = Some(s)
-                        update(None, currentCustomization, currentSerializedGraph)
-                        currentPlugin.render(pluginSpace.htmlElement)
-                        currentPlugin.renderControls(toolbar.htmlElement)
-                        currentPlugin.drawGraph()
-                        analyticsHit(currentPlugin.name)
-                    }{e => }
-                }
+                    currentPlugin.render(pluginSpace.htmlElement)
+                })
+            } else {
+                //this is correct, since googleMap (which uses serialized graph) plugin is not available in browsing mode
+                currentSerializedGraph = None
+                languagesButton.render(toolbar.htmlElement)
+                currentPlugin.renderControls(toolbar.htmlElement)
+                currentPlugin.render(pluginSpace.htmlElement)
+                update(currentGraph, currentCustomization, None)
+                currentPlugin.drawGraph()
             }
         }
     }
@@ -403,10 +414,64 @@ class PluginSwitchView(prefixApplier: PrefixApplier) extends GraphView with Comp
 
     def getCurrentGraphView = currentPlugin match {
         case visual: VisualPluginView =>
-            visual.graphView
+            visual.getGraphView
         case _ => None
     }
 
+<<<<<<< HEAD
     @javascript(""" ga('send', 'event', 'Visualization', 'Show', visualizationName); """)
     def analyticsHit(visualizationName: String) {}
+=======
+    /**
+     * Each pluginView checks for its pair transformator in availableTransformations and if it is present in the list
+     * and the pluginView is able to visualize the transformed graph (check by plugin.isAvailable)
+     * a link to that pluginView is added to the PluginSwitchButton (thus the plugin is available for user).
+     *
+     * Additionally if preferredPlugin is available (transformator is available and the plugin can process
+     * the transformation result), the pluginSwitchView switches to it.
+     * @param availableTransformations
+     * @param evaluationId
+     * @param preferedPlugin
+     */
+    def setAvailablePlugins(availableTransformations: List[String], preferredPlugin: String) {
+
+        if(evaluationId.isDefined) {
+            pluginChangeButton.items = plugins.map { plugin =>
+                createPluginSwitchButtonItem(plugin)
+            }
+
+            plugins.foreach{ plugin =>
+                plugin.isAvailable(availableTransformations, evaluationId.get, { () =>
+                    if(normalizeClassName(plugin.getClass.getName) == preferredPlugin) {
+                        autoSwitchPlugin(normalizeClassName(plugin.getClass.getName))
+                    }
+                }, { () =>
+                    pluginChangeButton.items.find(_.subViews(0).asInstanceOf[Anchor].subViews(0).asInstanceOf[Text].text == plugin.name).map(
+                        _.hide())
+                })}
+        } else {
+            new Div(List(new Text("No visualization plugin is available...")), "plugin-message large").render(
+                pluginSpace.htmlElement)
+        }
+    }
+
+    private def createPluginSwitchButtonItem(plugin: PluginView[_]): ListItem = {
+        val pluginAnchor = new Anchor(List(new Text(plugin.name)))
+        val listItem = new ListItem(List(pluginAnchor), normalizeClassName(plugin.getClass.getName))
+        pluginAnchor.mouseClicked += { e =>
+            pluginChangeButton.setActiveItem(listItem)
+            changePlugin(plugin)
+            UriHashTools.setUriParameter("viewPlugin", normalizeClassName(plugin.getClass.getName))
+            false
+        }
+        listItem
+    }
+
+    @javascript("""
+          if (normalizedPluginName.length > 0){
+            jQuery(".dropdown-menu ."+normalizedPluginName+" a").click();
+          }
+                """)
+    private def autoSwitchPlugin(normalizedPluginName: String) {}
+>>>>>>> playground
 }

@@ -13,6 +13,8 @@ import cz.payola.web.client.views.elements.lists._
 import cz.payola.web.client.views.elements.form.fields._
 import s2js.adapters.html.Element
 import cz.payola.web.client.views.bootstrap.Icon
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * Generic DataCube visualizer. Based on the graph, it searches DCV definition in it and provides
@@ -22,9 +24,7 @@ import cz.payola.web.client.views.bootstrap.Icon
  * @param prefixApplier Prefix applier
  * @author Jiri Helmich
  */
-class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("DataCube Universal", prefixApplier) {
-
-    def supportedDataFormat: String = "PayolaObj"
+class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("DataCube Universal", prefixApplier) {
 
     val controlsHolder = new Div(List(), "col-lg-4 dcv-controlsholder")
     val graphHolder = new Div(List(), "col-lg-8 dcv-graphholder")
@@ -344,5 +344,37 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView("D
 
     def createSubViews = {
         List(placeholder)
+    }
+
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        //TODO
+
+        IdentityTransformator.getSampleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            } else {
+                fail()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
+        //TODO
+        IdentityTransformator.transform(evaluationId)
+        { pageOfGraph =>
+            updateGraph(pageOfGraph)
+        }
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

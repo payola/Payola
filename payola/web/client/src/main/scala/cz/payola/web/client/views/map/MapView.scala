@@ -10,15 +10,16 @@ import s2js.adapters.dom.Element
 import cz.payola.web.client.View
 import cz.payola.web.client.views.map.facets._
 import scala.collection.mutable.ArrayBuffer
-import cz.payola.web.shared.AnalysisEvaluationResultsManager
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.events._
 import cz.payola.common.geo.Coordinates
+import cz.payola.web.shared.transformators.RdfJsonTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 /**
  * @author Jiri Helmich
  */
-abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Map", prefixApplier) {
+abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("Map", prefixApplier) {
 
     val primaryFacetChanged = new SimpleBooleanEvent[MapFacet]
 
@@ -26,8 +27,6 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     protected var primaryFacet: Option[MapFacet] = None
 
     def createLibWrapper(element: Element) : View
-
-    def supportedDataFormat: String = "RDF/JSON"
 
     val facetPlaceholder = new Div(List(),"facet-placeholder col-lg-3")
     val mapPlaceholder = new Div(List(),"map-placeholder col-lg-9")
@@ -61,7 +60,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
     }
 
     override def updateSerializedGraph(serializedGraph: Option[String]) {
-        AnalysisEvaluationResultsManager.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
+        RdfJsonTransformator.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
 
             facets = properties.map{ p =>
                 val facet = new GroupingMapFacet(p)
@@ -146,5 +145,19 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
 
     def createSubViews = {
         List(facetPlaceholder, mapPlaceholder)
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+         success() //TODO when is available????
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
+        RdfJsonTransformator.getCompleteGraph(evaluationId)(updateGraph(_)) //TODO default graph and paginating
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }

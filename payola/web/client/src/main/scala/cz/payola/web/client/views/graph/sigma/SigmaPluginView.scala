@@ -13,30 +13,46 @@ import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.graph.sigma.properties._
 import cz.payola.web.client.views.graph.sigma.PropertiesSetter._
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import s2js.compiler.javascript
+import s2js.adapters.html.Element
 
-abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier){
+abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph](name, prefixApplier) {
+
     protected var sigmaPluginWrapper = new Div().setAttribute("style", "padding: 0 5px; min-width: 200px; min-height: 200px;")
+
+    sigmaPluginWrapper.mouseMoved += { e =>
+        mouseX = e.clientX
+        mouseY = e.clientY
+        false
+    }
+
+    protected var mouseX = 0.0
+    protected var mouseY = 0.0
 
     private var edgesNum = 0
 
     protected var sigmaInstance: Option[sigma.Sigma] = None
 
-    //protected val animationStartStopButton = new Button(new Text("Start"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+    private var parentElement: Option[html.Element] = None
+
+    protected val animationStartStopButton = new Button(new Text("Start positioning"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
 
     def createSubViews = List(sigmaPluginWrapper)
 
     override def render(parent: html.Element) {
         super.render(parent)
-        updateSigmaPluginSize(parent)
+        parentElement = Some(parent)
     }
 
     override def renderControls(toolbar: html.Element) {
-        //animationStartStopButton.render(toolbar)
-        //animationStartStopButton.setIsEnabled(true)
+        animationStartStopButton.render(toolbar)
+        animationStartStopButton.setIsEnabled(true)
     }
 
     override def destroyControls() {
-        //animationStartStopButton.destroy()
+        animationStartStopButton.destroy()
     }
 
     private def updateSigmaPluginSize(parent: html.Element) {
@@ -52,7 +68,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
         super.destroy()
 
         if(sigmaInstance.isDefined) {
-            sigmaInstance.get.emptyGraph
+            clearGraph()
         }
     }
 
@@ -60,6 +76,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
 
     override def updateCustomization(newCustomization: Option[DefinedCustomization]) {
 
+        /*TODO
         if (sigmaInstance.isDefined) {
             if(newCustomization.isDefined) {
                 sigmaInstance.get.iterNodes{ node =>
@@ -76,56 +93,100 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
                     }
                 }
             } else {
-                sigmaInstance.get.iterNodes{ node =>
+                sigmaInstance.get.graph.nodes.foreach{ node =>
                     updateNode(None, node)
                 }
-                sigmaInstance.get.iterEdges{ edge =>
+                sigmaInstance.get.graph.edges.foreach{ edge =>
                     updateEdge(None, edge)
                 }
             }
 
 
-            sigmaInstance.get.draw()
-        }
+            sigmaInstance.get.refresh()
+        }*/
     }
 
-    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean) {
+    override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean = true) {
+
+        super.updateGraph(graph, false)
+
+        parentElement.foreach(updateSigmaPluginSize(_))
 
         if (sigmaInstance.isEmpty && graph.isEmpty) {
             renderMessage(sigmaPluginWrapper.htmlElement, "The graph is empty...")
         } else {
-            if(sigmaInstance.isDefined) { //drop the current graph
-                sigmaInstance.get.emptyGraph
-            } else {
-                sigmaInstance = Some(sigma.init(sigmaPluginWrapper.htmlElement))
+            if(sigmaInstance.isDefined) {
+                clearGraph()
             }
-            setDrawingProperties()
-            fillGraph(graph)
-            sigmaInstance.get.draw()
+            fillGraph(graph, sigmaPluginWrapper.htmlElement)
         }
-
-        super.updateGraph(graph, false)
     }
+
+    @javascript("""
+                   return new sigma({
+                        graph: {
+                            nodes: nodeList,
+                            edges: edgeList
+                        },
+                        container: wrapper,
+                        settings: {
+                            drawEdges: true,
+                            defaultNodeColor: '#0088cc'
+                        }
+                   });
+                """)
+    protected def initSigma(nodeList: List[NodeProperties], edgeList: List[EdgeProperties], wrapper: Element): sigma.Sigma = null
+
+    def clearGraph()
 
     def setDrawingProperties()
 
-    def fillGraph(graph: Option[rdf.Graph])
+    def fillGraph(graph: Option[rdf.Graph], wrapper: Element)
 
     protected def createVertexView(label: String, vertex: rdf.IdentifiedVertex, edgesCount: Int,
-        attributes: ListBuffer[(String, _)]) {
+        attributes: ListBuffer[(String, _)]): NodeProperties =  {
 
         val props = new NodeProperties
         props.size = scala.math.min(props.size + edgesCount, 20)
         props.label = label
         props.value = attributes
-        sigmaInstance.get.addNode(vertex.uri, props)
+        props.id = vertex.uri
+
+        props
     }
 
-    protected def createEdgeView(edge: rdf.Edge ) {
-        edge.destination match {
-            case i: rdf.IdentifiedVertex =>
-                sigmaInstance.get.addEdge(edgesNum+":"+edge.origin.uri+":"+edge.uri, edge.origin.uri, i.uri, new EdgeProperties())
-                edgesNum += 1
+    protected def createEdgeView(edge: rdf.Edge ): EdgeProperties = {
+        val props = new EdgeProperties
+        props.id = edgesNum+":"+edge.origin.uri+":"+edge.uri
+        props.source = edge.origin.uri
+        props.target = edge.destination.toString()
+        edgesNum += 1
+
+        props
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        IdentityTransformator.getSampleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            } else {
+                fail()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[rdf.Graph] => Unit) {
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
         }
     }
 }

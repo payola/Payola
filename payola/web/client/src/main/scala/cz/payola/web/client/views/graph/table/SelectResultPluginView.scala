@@ -6,6 +6,8 @@ import cz.payola.common.rdf._
 import cz.payola.web.client.views.elements._
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.models.PrefixApplier
+import cz.payola.web.shared.transformators.IdentityTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
 class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends TablePluginView("Select Result Table", prefixApplier)
 {
@@ -38,7 +40,7 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
         false
     }
 
-    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): Int = {
+    def fillTable(graph: Option[Graph], tableHead: html.Element, tableBody: html.Element, tablePageNumber: Int): (Int, Int, Int) = {
         if(graph.isDefined) {
             variables = mutable.ListBuffer.empty[String]
             solutions = mutable.HashMap.empty[String, mutable.ListBuffer[Binding]]
@@ -101,7 +103,7 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
                 1
             }
         }
-        0
+        ((graph.get.edges.size, 0, 0))
     }
 
     override def renderControls(toolbar: html.Element) {
@@ -110,6 +112,32 @@ class SelectResultPluginView(prefixApplier: Option[PrefixApplier]) extends Table
 
     override def destroyControls() {
         csvDownloadButton.destroy()
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+            IdentityTransformator.getSampleGraph(evaluationId) { sample =>
+            //TripleTableTransformator.getClass.getName does not work after s2js
+                if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                    success()
+                } else {
+                    fail()
+                }
+            }
+            { error =>
+                fail()
+                val modal = new FatalErrorModal(error.toString())
+                modal.render()
+            }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }
 

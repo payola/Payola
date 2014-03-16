@@ -38,6 +38,7 @@ class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechniq
 
     protected def getTechniquePerformer(component: Component, animate: Boolean): Animation[_] = {
         if (animate) {
+            animationStopForced = false
             val animationOfThis = new Animation(
                 runningAnimation, component, None, redrawQuick, redrawQuick, Some(70))
 
@@ -146,12 +147,18 @@ class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechniq
         var workingStructure = ListBuffer[EdgeViewPack]()
         edgeViews.foreach { view =>
             val origin = vertexViewPacks.find { element =>
-                element.value.isEqual(view.originView)
+                element.value.represents(view.originView.getFirstContainedVertex)
             }
             val destination = vertexViewPacks.find { element =>
-                element.value.isEqual(view.destinationView)
+                element.value.represents(view.destinationView.getFirstContainedVertex)
             }
-            workingStructure += new EdgeViewPack(view, origin.get, destination.get)
+            if(!workingStructure.exists{ edgePack =>
+                origin.get.value.represents(
+                    edgePack.value.edgeModel.origin) && destination.get.value.represents(
+                    edgePack.value.edgeModel.destination)
+            }) {
+                workingStructure += new EdgeViewPack(view, origin.get, destination.get)
+            }
         }
 
         workingStructure
@@ -173,7 +180,7 @@ class GravityTechnique(prefixApplier: Option[PrefixApplier]) extends BaseTechniq
 
             //set repulsion by all other vertices
             vertexViewPacks.foreach { pushing =>
-                if (!(pushed.value.isEqual(pushing.value))) {
+                if (!pushed.value.represents(pushing.value.getFirstContainedVertex)) {
 
                     //minus repulsion of vertices
                     val forceElimination = repulsion / (

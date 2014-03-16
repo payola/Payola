@@ -6,13 +6,13 @@ class NodeProperties extends sigma.NodeProperties {
     var x: Double = math.random
     var y: Double = math.random
     var size: Int = 5
-    var color: String = "green"
+    var color: String = "#0088cc"
     var value: Any = null
     var label: String = ""
-    var cluster: Int = 0
+    var id: String = ""
 }
 
 object NodeProperties {
     val size: Int = 5
-    val color: String = "green"
+    val color: String = "#0088cc"
 }

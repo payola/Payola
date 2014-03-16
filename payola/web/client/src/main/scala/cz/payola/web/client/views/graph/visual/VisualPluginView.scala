@@ -19,12 +19,16 @@ import cz.payola.common.visual.Color
 import lists.ListItem
 import models.PrefixApplier
 import tables._
-import scala.Some
+import cz.payola.web.shared.transformators.VisualTransformator
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechnique
+import cz.payola.web.client.views.elements.form.fields.CheckBox
+import cz.payola.web.client.views.elements.form.Label
 
 /**
  * Representation of visual based output drawing plugin
  */
-abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView(name, prefixApplier)
+abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView[Graph](name, prefixApplier)
 {
     /**
      * Value used during vertex selection process.
@@ -44,7 +48,9 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     /**
      * Graph visualized by the plugin.
      */
-    var graphView: Option[views.graph.visual.graph.GraphView] = None
+    protected var graphView: Option[views.graph.visual.graph.GraphView] = None
+
+    def getGraphView = graphView
 
     /**
      * Canvas with binded event listeners.
@@ -66,6 +72,13 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      */
     protected val animationStopButton = new Button(new Text("Stop animation"), "pull-right",
         new Icon(Icon.stop)).setAttribute("style", "margin: 0 5px;")
+
+    protected val animateAfterGroupsChange = new CheckBox("repositionAfterGroupChange", true,
+        "Reset positioning after group un/packing", "pull-right").setAttribute("style", "margin-top: 5px;")
+
+    protected val animateAfterGroupPacking = new Div(List(
+        new Label("Reposition when group changed", animateAfterGroupsChange.formHtmlElement),
+        new Div(List(animateAfterGroupsChange), "pull-right")), "pull-right")
 
     /**
      * This is set to true if the animationStopButton is pressed.
@@ -229,7 +242,11 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
 
     groupVertices.mouseClicked += { e =>
         graphView.get.createGroup(topLayer.getCenter)
-        redraw()
+        if(animateAfterGroupsChange.value) {
+            drawGraph()
+        } else {
+            redraw()
+        }
         false
     }
 
@@ -244,6 +261,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     private def createInfoTable(vertexElement: VertexViewElement) {
+        triggerDestroyVertexInfo
         vertexElement match {
             case group: VertexViewGroup => createVertexGroupInfoTable(group)
             case view: VertexView => createLiteralsInfoTable(view)
@@ -251,13 +269,37 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     private def createVertexGroupInfoTable(vertexGroup: VertexViewGroup) {
+        triggerDestroyVertexInfo
         val infoTable = new VertexGroupInfoTable(vertexGroup, Point2D.Zero, prefixApplier)
 
         infoTable.removeVertexFromGroup += { e =>
             triggerDestroyVertexInfo()
-            graphView.get.removeVertexFromGroup(e.target, topLayer.getCenter)
-            redraw()
+            val vertexLinks = graphView.get.removeVertexFromGroup(e.target)
+            if(e.target.getFirstContainedVertex().isInstanceOf[VertexLink]) {
+                View.blockPage("Fetching data")
+               fetchVertexLinks(vertexLinks, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
+            } else {
+                if(!this.isInstanceOf[GravityTechnique]) drawGraph() //redrawing with gravity technique makes the graph quite messy
+                else redraw()
+            }
+            true
         }
+
+        infoTable.removeAllFromGroup += { e =>
+            triggerDestroyVertexInfo()
+            val links = graphView.get.removeVerticesFromGroup(e.target)
+
+            if(!e.target.isEmpty && e.target(0).getFirstContainedVertex().isInstanceOf[VertexLink]) {
+                View.blockPage("Fetching data")
+                fetchVertexLinks(links, !this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value)
+            } else {
+                //redrawing with gravity technique ruins the positioning
+                if(!this.isInstanceOf[GravityTechnique] && animateAfterGroupsChange.value) drawGraph()
+                else redraw()
+            }
+            true
+        }
+
 
         infoTable.groupNameField.changed += { k =>
             vertexGroup.setName(infoTable.groupNameField.value)
@@ -271,6 +313,30 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
         infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
+    }
+
+    private def fetchVertexLinks(uriLinks: List[(String, Point2D)], rerunPositioningTechnique: Boolean) {
+        evaluationId.foreach(VisualTransformator.getVerticesDetail(_, uriLinks.map(_._1)){ paginated =>
+            zoomControls.reset()
+            graphView.foreach { gV =>
+                paginated.foreach(gV.extend(_, uriLinks.head._2))
+                hideByCustomization(currentCustomization)
+                gV.setConfiguration(currentCustomization)
+                _parentHtmlElement.foreach(gV.render(_))
+            }
+            val singleVertices = graphView.map(_.existsGroupWithOneVertex).getOrElse(List())
+            if(!singleVertices.isEmpty) {
+                fetchVertexLinks(
+                    singleVertices.map{ singleV => ((singleV.getFirstContainedVertex.toString, singleV.position)) },
+                    rerunPositioningTechnique) //if there is a group with only one vertex repeat the process
+            } else {
+                View.unblockPage()
+                if(rerunPositioningTechnique) drawGraph() else redraw()
+            }
+        } { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        })
     }
 
     private def createLiteralsInfoTable(vertexView: VertexView) {
@@ -417,12 +483,14 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         animationStopButton.render(toolbar)
         animationStopButton.setIsEnabled(false)
         visualTools.render(toolbar)
+        animateAfterGroupPacking.render(toolbar)
     }
 
     override def destroyControls() {
         zoomControls.destroy()
         animationStopButton.destroy()
         visualTools.destroy()
+        animateAfterGroupPacking.destroy()
     }
 
     /**
@@ -523,11 +591,8 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
      * Description of mouse-released event.
      */
     private def onMouseUp(eventArgs: MouseEventArgs[Canvas]) {
-        val selectedVertices = if (graphView.isDefined) {
-            graphView.get.getAllVertices.filter(_.isSelected)
-        } else {
-            List()
-        }
+        val selectedVertices =
+            graphView.map{gv => gv.getAllVertices.filter(_.isSelected)}.getOrElse(List())
 
         if (!mouseIsDragging && !mousePressedVertex && !eventArgs.shiftKey) {
             //deselect all
@@ -633,5 +698,51 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     private def updateCanvasSize() {
         layerPack.size = Vector2D(window.innerWidth, window.innerHeight) - (topLayer.offset - Vector2D(0,
             window.scrollY))
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        VisualTransformator.getSampleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("VisualTransformator"))) {
+                success()
+            } else {
+                fail()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraphFnc: Option[Graph] => Unit) {
+        VisualTransformator.transform(evaluationId)
+        { graph =>
+            View.blockPage("Loading initial graph")
+            updateGraphFnc(graph)
+            if(graphView.isEmpty) {
+                _parentHtmlElement.foreach{ htmlParent =>
+                    htmlParent.innerHTML = ""
+                    htmlParent.setAttribute("style", "height: 300px;")
+                    renderMessage(htmlParent, "The graph is empty...")
+                }
+            } else {
+                var singleVertices = graphView.get.existsGroupWithOneVertex
+                if(!singleVertices.isEmpty) {
+                    var vertexLinks = graphView.get.removeVerticesFromGroup(singleVertices)
+                    fetchVertexLinks(vertexLinks, animateAfterGroupsChange.value)
+                } else {
+                    View.unblockPage()
+                    drawGraph
+                }
+            }
+        }
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+            View.unblockPage()
+        }
     }
 }

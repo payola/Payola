@@ -3,15 +3,16 @@ package cz.payola.web.shared
 import s2js.compiler._
 import cz.payola.model.ModelException
 import cz.payola.domain.entities._
-import cz.payola.web.shared.managers.ShareableEntityManager
+import cz.payola.web.shared.managers._
 import cz.payola.common._
+import cz.payola.domain.rdf.Graph
+import cz.payola.common.EvaluationSuccess
 
 @remote
 @secured object  AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
-    @async def runAnalysisById(id: String, oldEvaluationId: String,
-        checkAnalysisStore: Boolean = false, user: Option[User] = None)
+    @async def runAnalysisById(id: String, oldEvaluationId: String, user: Option[User] = None)
         (successCallback: (String => Unit))
         (failCallback: (Throwable => Unit)) {
 
@@ -21,7 +22,7 @@ import cz.payola.common._
         successCallback(evaluationId)
     }
 
-    @async def getEvaluationState(evaluationId: String, analysisId: String, paginate: Boolean = false, user: Option[User] = None)
+    @async def getEvaluationState(evaluationId: String, analysisId: String, user: Option[User] = None)
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
@@ -33,24 +34,34 @@ import cz.payola.common._
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
                 response match {
                     case r: EvaluationSuccess =>
-                            Payola.model.analysisResultStorageModel.saveGraph(r.outputGraph, analysisId, evaluationId, host, user)
-                            EvaluationSuccess(Payola.model.analysisResultStorageModel.paginate(r.outputGraph),r.instanceErrors)
+                        Payola.model.analysisResultStorageModel.saveGraph(
+                            r.outputGraph, analysisId, evaluationId, host, user)
+                        val availableTransformators: List[String] =
+                            TransformationManager.getAvailableTransformations(r.outputGraph)
+                        EvaluationCompleted(availableTransformators, r.instanceErrors)
 
-                    case _ => response
+                    case _ =>
+                        response
                 }
             } catch {
-                // the evaluation was never started, the result is in resultStorage
-                case e: ModelException =>
-                    user.map{ u =>
-                        val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
-                        EvaluationSuccess(if (paginate) { Payola.model.analysisResultStorageModel.paginate(graph) } else { graph }, List())
-                    }.getOrElse { throw e }
-
-                case e => throw e
+                case e: ModelException => // the evaluation was never started, the result is in resultStorage
+                    val graph = Payola.model.analysisResultStorageModel.getGraph(evaluationId)
+                    val availableTransformators: List[String] = TransformationManager.getAvailableTransformations(graph)
+                    EvaluationCompleted(availableTransformators, List())
+                case p =>  {
+                    throw p
+                }
             }
 
         successCallback(resultResponse)
     }
+
+    @async def evaluationExists(evaluationId: String, user: Option[User] = None)(successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        successCallback(Payola.model.analysisResultStorageModel.exists(evaluationId))
+    }
+
 
     /**
      * Partial analysis remote proxy

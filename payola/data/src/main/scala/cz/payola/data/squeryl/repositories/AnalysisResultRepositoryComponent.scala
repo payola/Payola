@@ -43,5 +43,13 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
                 )
             }
         }
+
+        def exists(evaluationId: String): Boolean = {
+            selectOneWhere(anRes => anRes.evaluationId === evaluationId).isDefined
+        }
+
+        def byEvaluationId(evaluationId: String): Option[AnalysisResult] = {
+            selectOneWhere(anRes => anRes.evaluationId === evaluationId)
+        }
     }
 }

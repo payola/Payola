@@ -11,6 +11,8 @@ import scala.collection._
 import cz.payola.common.geo.Coordinates
 import cz.payola.web.client.views.bootstrap.Icon
 import cz.payola.web.client.views.map.libwrappers.TimeGoogleHeatMapWrapper
+import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.shared.transformators.IdentityTransformator
 
 /**
  * Time Heatmap visualizer. Based on DCV found in supplied graph, it makes the user able to configure the time dimension,
@@ -18,9 +20,7 @@ import cz.payola.web.client.views.map.libwrappers.TimeGoogleHeatMapWrapper
  *
  * @author Jiri Helmich
  */
-class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView("Time heatmap", prefixApplier) {
-
-    def supportedDataFormat: String = "PayolaObj"
+class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Graph]("Time heatmap", prefixApplier) {
 
     val mapPlaceholder = new Div(List(),"map-placeholder")
 
@@ -197,5 +197,33 @@ class TimeHeatmap(prefixApplier: Option[PrefixApplier] = None) extends PluginVie
 
     def createSubViews = {
         List(mapPlaceholder)
+    }
+
+    override def isAvailable(availableTransformators: List[String], evaluationId: String,
+        success: () => Unit, fail: () => Unit) {
+
+        //TODO
+
+        IdentityTransformator.getSampleGraph(evaluationId) { sample =>
+            if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
+                success()
+            } else {
+                fail()
+            }
+        }
+        { error =>
+            fail()
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
+    }
+
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Graph] => Unit) {
+        //TODO
+        IdentityTransformator.transform(evaluationId)(updateGraph(_))
+        { error =>
+            val modal = new FatalErrorModal(error.toString())
+            modal.render()
+        }
     }
 }
