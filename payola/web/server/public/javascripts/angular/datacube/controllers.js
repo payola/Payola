@@ -2,8 +2,8 @@
 
 angular.module('dataCube.controllers', []).
     controller('DataCube',
-        ['$scope', 'DataCubeService', 'analysisId', 'evaluationId', '$q', function ($scope, DataCubeService, analysisId,
-            evaluationId, $q) {
+        ['$scope', 'DataCubeService', 'analysisId', 'evaluationId', '$q', '$location', function ($scope, DataCubeService,
+            analysisId, evaluationId, $q, $location) {
 
             const URI_rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
             const URI_dsd = "http://purl.org/linked-data/cube#DataStructureDefinition";
@@ -25,6 +25,7 @@ angular.module('dataCube.controllers', []).
             $scope.XAxisDimension = null;
             $scope.activeMeasure = null;
             $scope.error = null;
+            $scope.filtersString = "";
 
             $scope.highcharts = {
                 options: {
@@ -47,6 +48,62 @@ angular.module('dataCube.controllers', []).
             };
 
             $scope.labelsMap = {};
+
+            $scope.setDimensionsValuesEnabled = function (map) {
+                angular.forEach($scope.dataStructures[$scope.selectedDataStructure].dimensions, function (dim, dimUri) {
+                    var negative = dim.order == 1;
+                    if (map[dim.uri]) {
+                        angular.forEach(dim.values, function (val) {
+                            var ptr = (val.uri ? "<" + val.uri + ">" : "'"+val.value+"'");
+
+                            if (negative) {
+                                val.active = map[dim.uri][ptr] !== false;
+                            } else {
+                                val.active = map[dim.uri][ptr];
+                            }
+                        });
+                    }
+                });
+            };
+
+            $scope.setActiveValue = function (dimUri, v) {
+                var dimension = $scope.dataStructures[$scope.selectedDataStructure].dimensions[dimUri];
+                var currentValue = v.active;
+
+                if (dimension.order > 2) {
+                    if (currentValue == false) {
+                        v.active = true;
+                        return;
+                    }
+                    angular.forEach(dimension.values, function (value) {
+                        value.active = value == v;
+                    });
+                }
+            };
+
+            $scope.applyFilters = function (callback) {
+                return function () {
+                    if ($scope.filtersString) {
+                        var filters = decodeURIComponent($scope.filtersString);
+                        var components = filters.split(";;");
+
+                        var map = {};
+
+                        angular.forEach(components, function (c) {
+                            var plusMinus = c.substring(0, 1);
+                            var rest = c.substring(1);
+                            var v = rest.split("$:$:$");
+
+                            map[v[0]] = map[v[0]] || {};
+                            map[v[0]][v[1]] = plusMinus == "+";
+                        });
+
+                        $scope.setDimensionsValuesEnabled(map);
+                        $scope.filtersString = "";
+                    }
+                    callback();
+                };
+            };
 
             DataCubeService.get({queryName: "list-cubes", analysisId: analysisId, evaluationId: evaluationId},
                 function (data) {
@@ -131,7 +188,7 @@ angular.module('dataCube.controllers', []).
                 });
             };
 
-            $scope.switchDSD = function ($index, force) {
+            $scope.switchDSD = function ($index, force, setUrl) {
 
                 if (force || $scope.selectedDataStructure != $index) {
                     $scope.selectedDataStructure = $index;
@@ -139,7 +196,7 @@ angular.module('dataCube.controllers', []).
                     $scope.activeMeasure = $scope.dataStructures[$index].measuresOrdered[0] || $scope.dataStructures[$index].measuresOrdered[1];
 
                     $scope.highcharts.title.text = $scope.dataStructures[$index].label;
-                    $scope.highcharts.yAxis.title.text = $scope.activeMeasure.label.substring(0,25)+"...";
+                    $scope.highcharts.yAxis.title.text = $scope.activeMeasure.label.substring(0, 25) + "...";
 
                     angular.forEach($scope.dataStructures, function (dsd, i) {
                         if (i != $index) {
@@ -148,28 +205,12 @@ angular.module('dataCube.controllers', []).
                     });
                     $scope.dataStructures[$index].active = true;
 
-                    $scope.buildUI($scope.loadData);
+                    $scope.buildUI($scope.applyFilters($scope.loadData));
+
+                    if (setUrl) {
+                        $location.search("dsd", encodeURIComponent($scope.dataStructures[$index].uri));
+                    }
                 }
-            }
-
-            $scope.setXAxis = function (uri) {
-                /*$scope.XAxisDimension = $scope.dataStructures[$scope.selectedDataStructure].dimensions[uri];
-
-                 console.log(uri);
-
-                 angular.forEach($scope.dataStructures[$scope.selectedDataStructure].dimensions, function (dim, dimUri) {
-                 var i = 0;
-                 angular.forEach(dim.values, function (val, valUri) {
-                 if (dimUri != uri) {
-                 val.active = i == 0;
-                 } else {
-                 val.active = true;
-                 }
-
-                 ++i;
-                 });
-                 });*/
-
             };
 
             $scope.loadData = function () {
@@ -181,7 +222,7 @@ angular.module('dataCube.controllers', []).
                 filters = filters.concat(computeFilters($scope.dataStructures[$scope.selectedDataStructure].attributes));
                 var filtersFrom = []
                 var dimCount = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.length;
-                if(dimCount > 3){
+                if (dimCount > 3) {
                     filtersFrom = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered.slice(-(dimCount - 3));
                 }
                 filters = filters.concat(computeFilters(filtersFrom, true));
@@ -195,6 +236,8 @@ angular.module('dataCube.controllers', []).
                     cycleDim = 2;
                 }
 
+                var globalFilters = [];
+
                 var dim = $scope.dataStructures[$scope.selectedDataStructure].dimensionsOrdered[cycleDim];
                 angular.forEach(dim.values, function (v, k) {
 
@@ -203,6 +246,8 @@ angular.module('dataCube.controllers', []).
                     var localFilters = filters.concat(computeFilters([
                         {uri: dim.uri, isDate: dim.isDate, values: [v]}
                     ], true));
+
+                    globalFilters = globalFilters.concat(localFilters);
 
                     DataCubeService.get({queryName: "data", evaluationId: evaluationId, measure: measureUri, dimension: $scope.XAxisDimension.uri, filters: localFilters.map(function (x) {
                         return (x.positive ? "+" : "-") + x.component + "$:$:$" + x.value + "$:$:$" + x.isDate;
@@ -233,23 +278,20 @@ angular.module('dataCube.controllers', []).
                     });
                 });
 
+                persistFilterState(globalFilters);
+
             };
+
+            function persistFilterState(filters) {
+                var f = filters.map(function (x) {
+                    return (x.positive ? "+" : "-") + x.component + "$:$:$" + x.value;
+                });
+
+                $location.search("filters", f.join(";;"));
+            }
 
             $scope.refresh = function () {
                 $scope.loadData();
-            };
-
-            $scope.setActiveValue = function (v) {
-                /*var currentValue = dimension.values[$valueIndex].active;
-                 if (dimension != $scope.XAxisDimension) {
-                 if (currentValue == false) {
-                 dimension.values[$valueIndex].active = true;
-                 return;
-                 }
-                 angular.forEach(dimension.values, function (value, key) {
-                 value.active = key == $valueIndex;
-                 });
-                 }*/
             };
 
             $scope.loadingDataDone = function () {
@@ -258,8 +300,43 @@ angular.module('dataCube.controllers', []).
                     return;
                 }
 
-                $scope.switchDSD(0, true);
+                if ($location.search().dsd) {
+                    angular.forEach($scope.dataStructures, function (val, key) {
+                        if (val.uri == decodeURIComponent($location.search().dsd)) {
+                            $scope.switchDSD(key, true);
+                        }
+                    });
+                } else {
+                    $scope.switchDSD(0, true);
+                }
+
+                if ($location.search().chartType) {
+                    $scope.switchChart($location.search().chartType);
+                }
+
+                if ($location.search().polarChart) {
+                    $scope.switchPolar($location.search().polarChart);
+                }
+
+                if ($location.search().filters) {
+                    $scope.filtersString = $location.search().filters;
+                }
+
                 $scope.initDone = true;
+            };
+
+            $scope.switchChart = function (chartType, setUrl) {
+                $scope.highcharts.options.chart.type = chartType;
+                if (setUrl) {
+                    $location.search("chartType", chartType);
+                }
+            };
+
+            $scope.switchPolar = function (isPolar, setUrl) {
+                $scope.highcharts.options.chart.polar = isPolar === true;
+                if (setUrl) {
+                    $location.search("isPolar", isPolar === true);
+                }
             };
 
             function computeFilters(components, positive) {
@@ -336,8 +413,6 @@ angular.module('dataCube.controllers', []).
                 }
 
                 $scope.dataStructures.push(dsdRef);
-
-                console.log(dsdRef);
             }
 
         }])

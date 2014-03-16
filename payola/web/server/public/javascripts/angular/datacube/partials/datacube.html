@@ -23,7 +23,7 @@
             <div class="panel-body">
                 <p ng-show="dataStructures.length == 0">No data structures found in the supplied datasource.</p>
                 <ul class="list-unstyled" ng-show="dataStructures.length > 0">
-                    <li ng-repeat="ds in dataStructures"><input type="checkbox" ng-model="ds.active" ng-change="switchDSD($index)" />&nbsp;{{ds.label}}</li>
+                    <li ng-repeat="ds in dataStructures"><input type="checkbox" ng-model="ds.active" ng-change="switchDSD($index, false, true)" />&nbsp;{{ds.label}}</li>
                 </ul>
             </div>
             <div class="panel-footer"></div>
@@ -50,7 +50,7 @@
                     <li ng-repeat="dimension in dataStructures[selectedDataStructure].dimensionsOrdered | orderBy:'order'">
                         {{dimension.label || dimension.uri}}
                         <ul style="max-height: 200px; overflow: scroll;">
-                            <li ng-repeat="v in dimension.values | orderBy:['prefLabel', 'label', 'notion', 'uri', 'value']"><input type="checkbox" ng-model="v.active" ng-change="setActiveValue(v)" />&nbsp;{{v.prefLabel || v.label || v.notion || v.uri || v.value}}</li>
+                            <li ng-repeat="v in dimension.values | orderBy:['prefLabel', 'label', 'notion', 'uri', 'value']"><input type="checkbox" ng-model="v.active" ng-change="setActiveValue(dimension.uri, v)" />&nbsp;{{v.prefLabel || v.label || v.notion || v.uri || v.value}}</li>
                         </ul>
                         <p class="alert alert-danger" ng-show="dimension.values.length == 0">This dimension has no values. That's why your chart is empty.</p>
                     </li>
@@ -98,18 +98,18 @@
     <div class="col-lg-9">
         <div class="alert alert-danger" ng-show="dataStructures.length == 0"><p>The chosen datasource does not contain any DataCube vocabularies.</p></div>
 
-        <button class="btn btn-default" ng-click="refresh()"><i class="glyphicon glyphicon-refresh"></i> Refresh</button>
+        <button class="btn btn-primary" ng-click="refresh()"><i class="glyphicon glyphicon-refresh"></i> Refresh</button>
 
         <div class="btn-group">
-            <button class="btn btn-default" ng-click="highcharts.options.chart.type = 'line'">Line</button>
-            <button class="btn btn-default" ng-click="highcharts.options.chart.type = 'bar'">Bar</button>
-            <button class="btn btn-default" ng-click="highcharts.options.chart.type = 'column'">Column</button>
-            <button class="btn btn-default" ng-click="highcharts.options.chart.type = 'area'">Area</button>
-            <button class="btn btn-default" ng-click="highcharts.options.chart.type = 'pie'">Pie</button>
+            <button class="btn btn-default" ng-click="switchChart('line', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'line'}">Line</button>
+            <button class="btn btn-default" ng-click="switchChart('bar', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'bar'}">Bar</button>
+            <button class="btn btn-default" ng-click="switchChart('column', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'column'}">Column</button>
+            <button class="btn btn-default" ng-click="switchChart('area', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'area'}">Area</button>
+            <button class="btn btn-default" ng-disabled="highcharts.series.length > 1" ng-click="switchChart('pie', true); switchPolar(false, true);" ng-class="{'btn-success':highcharts.options.chart.type == 'pie'}">Pie</button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-default" ng-click="highcharts.options.chart.polar = true">Polar</button>
-            <button class="btn btn-default" ng-click="highcharts.options.chart.polar = false">Normal</button>
+            <button class="btn btn-default" ng-click="switchPolar(true, true)" ng-class="{'btn-success':highcharts.options.chart.polar}">Polar</button>
+            <button class="btn btn-default" ng-click="switchPolar(false, true)" ng-class="{'btn-success':!highcharts.options.chart.polar}">Normal</button>
         </div>
 
         <highchart id="chart1" config="highcharts" class="cubechart"></highchart>

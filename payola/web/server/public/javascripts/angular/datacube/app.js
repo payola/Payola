@@ -11,8 +11,7 @@ angular.module('dataCube', [
         'dataCube.controllers',
         "highcharts-ng"
     ]).
-    config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/',
-            {templateUrl: '/assets/javascripts/angular/datacube/partials/datacube.html', controller: 'DataCube'});
+    config(['$routeProvider','$locationProvider', function ($routeProvider) {
+        $routeProvider.when('/', {templateUrl: '/assets/javascripts/angular/datacube/partials/datacube.html', controller: 'DataCube', reloadOnSearch: false});
         $routeProvider.otherwise({redirectTo: '/'});
     }]);
