@@ -418,10 +418,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         case _ => None
     }
 
-<<<<<<< HEAD
+
     @javascript(""" ga('send', 'event', 'Visualization', 'Show', visualizationName); """)
     def analyticsHit(visualizationName: String) {}
-=======
+
     /**
      * Each pluginView checks for its pair transformator in availableTransformations and if it is present in the list
      * and the pluginView is able to visualize the transformed graph (check by plugin.isAvailable)
@@ -473,5 +473,4 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
           }
                 """)
     private def autoSwitchPlugin(normalizedPluginName: String) {}
->>>>>>> playground
 }
