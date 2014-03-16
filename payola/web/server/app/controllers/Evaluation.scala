@@ -31,6 +31,12 @@ object Evaluation extends PayolaController with Secured
         }
     }
 
+    def listCubes(analysisId: String, evaluationId: String) = maybeAuthenticated { user =>
+        Payola.model.analysisModel.getAccessibleToUserById(user, analysisId).map{ a =>
+            Ok("a")
+        }.getOrElse{ throw new Exception("") }
+    }
+
     def delete(id: String) = authenticatedWithRequest { (user, request) =>
         user.ownedAnalyses.find(_.id == id).map(Payola.model.analysisModel.remove(_))
             .getOrElse(NotFound("Analysis not found."))

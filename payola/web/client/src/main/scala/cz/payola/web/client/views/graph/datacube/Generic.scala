@@ -352,7 +352,7 @@ class Generic(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Gr
 
         //TODO
 
-        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+        IdentityTransformator.getSampleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                 success()
             } else {

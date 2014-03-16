@@ -168,7 +168,7 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-        IdentityTransformator.getSmapleGraph(evaluationId) { sample =>
+        IdentityTransformator.getSampleGraph(evaluationId) { sample =>
             if(sample.isEmpty && availableTransformators.exists(_.contains("IdentityTransformator"))) {
                 success()
             } else {

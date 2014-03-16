@@ -1,7 +1,6 @@
-@(user: Option[cz.payola.common.entities.User], title: String, heading: Option[String] = None)(content: Html)
-
+@(user: Option[cz.payola.common.entities.User], title: String, heading: Option[String] = None, scripts: Html = Html(""), ngApp: String = "")(content: Html)
 <!DOCTYPE html>
-<html>
+<html ng-app="@ngApp">
     <head>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("fonts/font-face/stylesheet.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
@@ -77,6 +76,8 @@
             };
         </script>
         <script src="http://js.arcgis.com/3.8/"></script>
+
+        @scripts
     </head>
     <body>
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">

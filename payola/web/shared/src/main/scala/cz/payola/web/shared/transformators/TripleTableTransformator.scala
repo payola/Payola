@@ -27,7 +27,7 @@ import cz.payola.common.rdf._
         true //tripleTable is always available
     }
 
-    @async def getSmapleGraph(evaluationId: String)
+    @async def getSampleGraph(evaluationId: String)
         (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
         successCallback(Payola.model.analysisResultStorageModel.getEmptyGraph())
     }

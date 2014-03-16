@@ -8,7 +8,6 @@ import org.squeryl.dsl.ast.LogicalBoolean
 import s2js.runtime.shared.rpc.RpcException
 
 trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
-
     self: SquerylDataContextComponent =>
     private type QueryType = (AnalysisResult, Option[Analysis], Option[EmbeddingDescription])
 
@@ -55,6 +54,10 @@ trait AnalysisResultRepositoryComponent extends TableRepositoryComponent {
                         set(anRes.touched := new java.sql.Timestamp(System.currentTimeMillis))
                     )
                 }
+            }
+
+            def byEvaluationId(evaluationId: String): Option[AnalysisResult] = {
+                selectOneWhere(anRes => anRes.evaluationId === evaluationId)
             }
 
             def exists(evaluationId: String): Boolean = {

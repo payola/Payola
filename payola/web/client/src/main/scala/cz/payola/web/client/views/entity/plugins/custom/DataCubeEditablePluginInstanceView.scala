@@ -24,6 +24,10 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.common.entities.plugins.parameters.StringParameter
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import s2js.compiler.javascript
+import cz.payola.web.shared.transformators._
+import cz.payola.common.EvaluationInProgress
+import cz.payola.common.EvaluationError
+import cz.payola.common.EvaluationCompleted
 
 /**
  * DataCube Editable plugin instance visualization
@@ -79,11 +83,11 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                 schedulePolling(evalId, {                       // on evaluation success callback - pattern done
                                     args =>
 
-                                        val query = "CONSTRUCT { " +
+                                        val query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   CONSTRUCT { " +
                                             "[] a <http://purl.org/linked-data/cube#Observation> ; " +
-                                            "<http://purl.org/linked-data/cube#dataSet> <http://live.payola" +
-                                            ".cz/analysis/"+analysis.id+"> ; " +
+                                            "<http://purl.org/linked-data/cube#dataSet> <http://live.payola.cz/analysis/"+analysis.id+"> ; " +
                                             getPattern(args.target.getSignificantVertices).mkString(" ; ") + " . " +
+                                            args.target.getSignificantVertices.map{v => v+" rdfs:label "+v.replace("?","?l")+" ."}.mkString(" ")+
                                             "} WHERE { " +
                                             "    { " +
                                             "        SELECT DISTINCT " + args.target.getSignificantVertices
@@ -91,6 +95,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                                             args.target.getPattern +
                                             "        } " +
                                             "    } " +
+                                            args.target.getSignificantVertices.map{v => " OPTIONAL { "+v+" rdfs:label "+v.replace("?","?l")+" . }"}.mkString(" ")+
                                             "} "
 
                                         input.updateValue(query)
@@ -143,30 +148,32 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
                         View.unblockPage()
                         AlertModal.display("Error", "An error occured.")
                     }
-                    case s: EvaluationSuccess => {
+                    case s: EvaluationCompleted => {
 
-                        val messages = getPlugin.parameters.map {
-                            p =>
-                                new Div(List(
-                                    new Text("Please, select a vertex corresponding to the " + p.defaultValue.toString+" ("+p.name + ") component:")
-                                ), "message")
-                        }
-                        val infoBar = new Div(messages, "datacube-infobar")
-                        val graphPlaceholder = new Div(List(infoBar), "datacube-preview")
+                        IdentityTransformator.transform(evaluationId){ g =>
+                            val messages = getPlugin.parameters.map {
+                                p =>
+                                    new Div(List(
+                                        new Text("Please, select a vertex corresponding to the " + p.defaultValue.toString+" ("+p.name + ") component:")
+                                    ), "message")
+                            }
+                            val infoBar = new Div(messages, "datacube-infobar")
+                            val graphPlaceholder = new Div(List(infoBar), "datacube-preview")
 
-                        val modal = new Modal("Analysis preview", List(graphPlaceholder), None, None, true,
-                            "preview-dialog")
-                        modal.render()
+                            val modal = new Modal("Analysis preview", List(graphPlaceholder), None, None, true,
+                                "preview-dialog")
+                            modal.render()
 
-                        val view = new SimpleGraphView(graphPlaceholder, getPlugin.parameters.size)
-                        view.update(Some(s.outputGraph), None, None)
+                            val view = new SimpleGraphView(graphPlaceholder, getPlugin.parameters.size)
+                            view.update(g, None, None)
 
-                        view.patternUpdated += {
-                            args =>
-                                callback(args)
-                                graphPlaceholder.destroy()
-                                modal.destroy()
-                        }
+                            view.patternUpdated += {
+                                args =>
+                                    callback(args)
+                                    graphPlaceholder.destroy()
+                                    modal.destroy()
+                            }
+                        }{ e => }
 
                         View.unblockPage()
                     }

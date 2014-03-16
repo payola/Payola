@@ -19,7 +19,7 @@ import cz.payola.web.shared.Payola
         successCallback(isAvailable(input))
     }
 
-    @async def getSmapleGraph(evaluationId: String)
+    @async def getSampleGraph(evaluationId: String)
         (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
         successCallback(Payola.model.analysisResultStorageModel.getEmptyGraph())
     }

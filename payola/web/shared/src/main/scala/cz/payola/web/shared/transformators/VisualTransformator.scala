@@ -20,7 +20,7 @@ import cz.payola.web.shared.Payola
         true //VisualTransformator is always available
     }
 
-    @async def getSmapleGraph(evaluationId: String)
+    @async def getSampleGraph(evaluationId: String)
         (successCallback: Graph => Unit)(errorCallback: Throwable => Unit) {
         successCallback(Payola.model.analysisResultStorageModel.getEmptyGraph())
     }

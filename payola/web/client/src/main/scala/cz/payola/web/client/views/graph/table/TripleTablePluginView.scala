@@ -168,7 +168,7 @@ class TripleTablePluginView(prefixApplier: Option[PrefixApplier]) extends TableP
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
         success: () => Unit, fail: () => Unit) {
 
-        TripleTableTransformator.getSmapleGraph(evaluationId) { sample =>
+        TripleTableTransformator.getSampleGraph(evaluationId) { sample =>
         //TripleTableTransformator.getClass.getName does not work after s2js
             if(sample.isEmpty && availableTransformators.exists(_.contains("TripleTableTransformator"))) {
                 success()

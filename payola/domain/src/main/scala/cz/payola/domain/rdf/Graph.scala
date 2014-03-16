@@ -22,7 +22,10 @@ object Graph
             RDFDataMgr.read(dataSet, dataInputStream, jenaLanguage)
             dataSet
         } catch {
-            case e: org.apache.jena.riot.RiotException => throw new IllegalArgumentException("Query failed, returned non-XML data: "+data.substring(0, 500))
+            case e: org.apache.jena.riot.RiotException => {
+                println(e.getMessage)
+                throw new IllegalArgumentException("Query failed, returned non-XML data: "+data.substring(0, 500))
+            }
             case e: Exception => throw new IllegalArgumentException(e.getMessage)
         }
     }

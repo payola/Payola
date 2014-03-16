@@ -11,6 +11,7 @@ import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common._
+import scala.Some
 import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
@@ -178,7 +179,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListU
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
             view.overviewView.controls.timeoutInfo.text = "0"
 
-            shared.AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
+            shared.AnalysisRunner.runAnalysisById(analysisId, evaluationId) { id =>
                 unblockPage()
                 elapsed = 0
 

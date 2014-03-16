@@ -67,7 +67,8 @@ class JenaGraph(model: Model)
     }
 
     private[rdf] def getModel: Model = {
-        model
+        //model
+        ModelFactory.createDefaultModel().add(model)
     }
 
     protected def makeGraph(representation: RdfRepresentation.Type, rdf: String): JenaGraph = {

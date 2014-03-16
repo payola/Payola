@@ -347,6 +347,8 @@ trait DataContextComponent
 
         def updateTimestamp(evaluationId: String)
 
+        def byEvaluationId(evaluationId: String) : Option[AnalysisResult]
+
         def exists(evaluationId: String): Boolean
 
         def getAllAvailableToUser(userId: Option[String]): Seq[AnalysisResult]

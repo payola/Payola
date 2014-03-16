@@ -550,7 +550,7 @@ button.datacube {
     position: relative;
 }
 
-.preview-dialog.modal .modal-body>div{
+.preview-dialog.modal .modal-body > div {
     padding-bottom: 65px;
 }
 
@@ -562,12 +562,12 @@ button.datacube {
     z-index: 1;
 }
 
-.preview-dialog .modal-dialog{
+.preview-dialog .modal-dialog {
     width: 100%;
     margin: 0;
 }
 
-.preview-dialog .connector{
+.preview-dialog .connector {
     margin-left: 47%;
 }
 
@@ -651,8 +651,6 @@ button.datacube {
     background: white;
     margin-top: 5px;
 }
-
-
 
 .form-group label {
     margin: 0;
