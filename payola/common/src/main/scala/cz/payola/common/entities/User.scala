@@ -29,6 +29,9 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     /** Type of the prefixes the user may use. */
     type PrefixType <: Prefix
 
+    /** Type of analysis result that the user has stored*/
+    type AnalysisResultType <: AnalysisResult
+
     protected var _email: String = ""
 
     protected var _password: String = ""
@@ -44,6 +47,8 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     protected var _customizations = mutable.ArrayBuffer[CustomizationType]()
 
     protected var _availablePrefixes = mutable.ArrayBuffer[PrefixType]()
+
+    protected var _availableAnalysesResults = mutable.ArrayBuffer[AnalysisResultType]()
 
     /** Email of the user. */
     def email = _email
@@ -84,6 +89,9 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
 
     /** The prefixes that are available to the user. */
     def availablePrefixes: immutable.Seq[PrefixType] = _availablePrefixes.toList
+
+    /** The prefixes that are available to the user. */
+   def availableAnalysesResults: immutable.Seq[AnalysisResultType] = _availableAnalysesResults.toList
 
     /**
       * Stores the specified analysis to the users owned analyses.
@@ -181,5 +189,21 @@ trait User extends Entity with NamedEntity with PrivilegeableEntity
     protected def discardOwnedPrefix(prefix: PrefixType) {
         if (prefix.owner == Some(this))
             _availablePrefixes -= prefix
+    }
+
+    /**
+     * Stores owned prefix to the user.
+     * @param prefix The prefix to user.
+     */
+    protected def storeAnalysisResult(analysisResult: AnalysisResultType) {
+        _availableAnalysesResults += analysisResult
+    }
+
+    /**
+     * Discards the stored analysis result from the user. Analysis result is stored by running analysis
+     * @param prefix The prefix to discard.
+     */
+    protected def discardStoredAnalysisResult(analysisResult: AnalysisResultType) {
+        _availableAnalysesResults -= analysisResult
     }
 }

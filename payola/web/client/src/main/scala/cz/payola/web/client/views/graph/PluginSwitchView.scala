@@ -92,7 +92,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             setEvaluationId(startEvaluationId)
         }
         plugins.find{ plugin =>
-            evaluationId.isEmpty && normalizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter("viewPlugin")
+            evaluationId.isEmpty && normalizeClassName(plugin.getClass.getName) == UriHashTools.getUriParameter(UriHashTools.viewPluginParameter)
         }.getOrElse(new EmptyPluginView())
     }
 
@@ -455,7 +455,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         pluginAnchor.mouseClicked += { e =>
             pluginChangeButton.setActiveItem(listItem)
             changePlugin(plugin)
-            UriHashTools.setUriParameter("viewPlugin", normalizeClassName(plugin.getClass.getName))
+            UriHashTools.setUriParameter(UriHashTools.viewPluginParameter, normalizeClassName(plugin.getClass.getName))
             false
         }
         listItem

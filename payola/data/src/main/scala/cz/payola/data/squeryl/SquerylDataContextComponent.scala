@@ -17,6 +17,7 @@ trait SquerylDataContextComponent
     with PrivilegeRepositoryComponent
     with PluginInstanceRepositoryComponent
     with AnalysisRepositoryComponent
+    with EmbeddingDescriptionRepositoryComponent
     with DataSourceRepositoryComponent
     with PluginRepositoryComponent
     with CustomizationRepositoryComponent

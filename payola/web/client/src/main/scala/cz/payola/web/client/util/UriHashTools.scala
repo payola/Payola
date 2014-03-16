@@ -4,6 +4,11 @@ import s2js.compiler.javascript
 
 object UriHashTools
 {
+
+    val viewPluginParameter = "viewPlugin"
+    val evaluationParameter = "evaluation"
+    val embeddingUpdateParameter = "embUpdate"
+
     @javascript("""
           if (window.location.hash){
             var params = self.getUriHash().split('&');
@@ -57,14 +62,28 @@ object UriHashTools
         """)
     def isAnyParameterInUri(): Boolean = false
 
-    @javascript("""return window.location.hash.substr(1);""")
+    @javascript("""
+          var hash = window.location.hash.substr(1);
+          if(!hash)
+            return window.location.search
+          else
+            return hash
+                """)
     def getUriHash(): String = null
 
     @javascript("""return encodeURIComponent(uri)""")
-    def encodeURIComponent(uri: String) : String = ""
+    def encodeURIComponent(uri: String): String = ""
 
     @javascript("""return decodeURIComponent(uri)""")
-    def decodeURIComponent(uri: String) : String = ""
+    def decodeURIComponent(uri: String): String = ""
 
+    def stripParams(link: String): String = {
+        val hashPosition = link.indexOf("#")
+        if(hashPosition != -1) {
+            link.substring(0, hashPosition)
+        } else {
+            link
+        }
 
+    }
 }

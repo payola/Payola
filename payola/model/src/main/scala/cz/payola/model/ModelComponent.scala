@@ -10,6 +10,7 @@ trait ModelComponent
     with GroupModelComponent
     with AnalysisModelComponent
     with AnalysisResultStorageModelComponent
+    with EmbeddingDescriptionModelComponent
     with PluginModelComponent
     with DataSourceModelComponent
     with OntologyCustomizationModelComponent

@@ -5,7 +5,6 @@ import scala.collection.immutable
 import scala.collection.mutable
 import cz.payola.data.squeryl._
 import cz.payola.data.squeryl.entities.settings._
-import scala.Some
 
 /**
  * This object converts [[cz.payola.common.entities.User]] to [[cz.payola.common.entities.User]].
@@ -60,6 +59,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
     _availablePrefixes = null
 
     private lazy val _ownedPrefixesQuery = context.schema.prefixOwnership.left(this)
+
+    _availableAnalysesResults = null
+
+    private lazy val _storedAnalysesResults = context.schema.storedAnalysisResultOwnership.left(this)
 
     override def ownedGroups: immutable.Seq[GroupType] = {
         if (_ownedGroups == null) {
@@ -133,6 +136,18 @@ class User(override val id: String, name: String, pwd: String, mail: String)
         _availablePrefixes.toList
     }
 
+    override def availableAnalysesResults: immutable.Seq[AnalysisResultType] = {
+        if (_availableAnalysesResults == null) {
+            wrapInTransaction {
+                _availableAnalysesResults = mutable.ArrayBuffer(
+                    context.analysisResultRepository.getAllAvailableToUser(Some(id)): _*
+                )
+            }
+        }
+
+        _availableAnalysesResults.toList
+    }
+
     override protected def storeOwnedAnalysis(analysis: User#AnalysisType) {
         super.storeOwnedAnalysis(context.schema.associate(Analysis(analysis), _ownedAnalysesQuery))
     }
@@ -162,6 +177,13 @@ class User(override val id: String, name: String, pwd: String, mail: String)
             context.schema.associate(Prefix(prefix), _ownedPrefixesQuery)
 
         super.storeOwnedPrefix(prefix)
+    }
+
+    override protected def storeAnalysisResult(analysisResult: User#AnalysisResultType) {
+        if (analysisResult.owner == Some(this))
+            context.schema.associate(AnalysisResult(analysisResult), _storedAnalysesResults)
+
+        super.storeAnalysisResult(analysisResult)
     }
 
     override protected def discardOwnedAnalysis(analysis: User#AnalysisType) {
@@ -196,5 +218,10 @@ class User(override val id: String, name: String, pwd: String, mail: String)
             context.prefixRepository.removeById(prefix.id)
 
         super.discardOwnedPrefix(prefix)
+    }
+
+    override protected def discardStoredAnalysisResult(analysisResult: User#AnalysisResultType) {
+        context.analysisResultRepository.removeById(analysisResult.id)
+        super.discardStoredAnalysisResult(analysisResult)
     }
 }

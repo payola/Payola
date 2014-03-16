@@ -5,7 +5,6 @@ import cz.payola.domain.entities.User
 import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
-import scala.collection._
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 import cz.payola.common.rdf.Graph
 import java.io._
@@ -36,7 +35,8 @@ trait AnalysisResultStorageModelComponent
                     .filterNot(_.startsWith("http://schema.org"))
             }
             
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None) {
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None,
+                embeddedHash: Option[String] = None) {
 
                 if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
                     return
@@ -47,7 +47,7 @@ trait AnalysisResultStorageModelComponent
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
                     analysisId, user, evaluationId, graph.vertices.size,
-                    new java.sql.Timestamp(System.currentTimeMillis)))
+                    new java.sql.Timestamp(System.currentTimeMillis)), embeddedHash)
 
                 val uri = constructUri(evaluationId)
 
@@ -123,6 +123,9 @@ trait AnalysisResultStorageModelComponent
             def getEmptyGraph(): Graph = {
                 JenaGraph.empty
             }
+
+            def getAllAvailableToUser(userId: Option[String]): scala.collection.Seq[AnalysisResult] =
+                analysisResultRepository.getAllAvailableToUser(userId)
         }
 
     val maxStoredAnalyses: Long

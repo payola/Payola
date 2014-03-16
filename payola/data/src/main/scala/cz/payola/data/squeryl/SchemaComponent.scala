@@ -103,6 +103,9 @@ trait SchemaComponent
         /**Table of [[cz.payola.data.squeryl.entities.AnalysisResult]]s */
         val analysesResults = table[AnalysisResult]("analysesResults")
 
+        /**Table of [[cz.payola.data.squeryl.entities.EmbeddingDescription]]s */
+        val embeddingDescription = table[EmbeddingDescription]("embeddingDescription")
+
         /**
          * Relation that associates members ([[cz.payola.data.squeryl.entities.User]]s)
          * to [[cz.payola.data.squeryl.entities.Group]]s
@@ -151,6 +154,13 @@ trait SchemaComponent
          */
         lazy val prefixOwnership = oneToManyRelation(users, prefixes).via(
             (u, p) => Option(u.id) === p.ownerId)
+
+        /**
+         * Relation that associates [[cz.payola.data.squeryl.entities.AnalysisResult]] to its owner
+         * ([[cz.payola.data.squeryl.entities.User]]s)
+         */
+        lazy val storedAnalysisResultOwnership = oneToManyRelation(users, analysesResults).via(
+            (u, a) => Option(u.id) === a.ownerId)
 
         /**
          * Relation that associates [[cz.payola.data.squeryl.entities.analyses.PluginDbRepresentation]] to a
@@ -328,6 +338,9 @@ trait SchemaComponent
         lazy val propertyCustomizationsOfClasses = oneToManyRelation(classCustomizations, propertyCustomizations).via(
             (c, p) => c.id === p.classCustomizationId)
 
+        lazy val analyzisResultOfAnalyzisName = oneToManyRelation(analyses, analysesResults).via(
+            (anal, result) => result.analysisId === anal.id)
+
         /**
          * All the entities have to be created using custom factories in order to inject their dependencies via the
          * implicit constructor parameter.
@@ -395,6 +408,9 @@ trait SchemaComponent
             },
             factoryFor(analysesResults) is {
                 new AnalysisResult("", None, "", 0, new java.sql.Timestamp(System.currentTimeMillis()))
+            },
+            factoryFor(embeddingDescription) is {
+                new EmbeddingDescription(None, "", None, "", new java.sql.Timestamp(System.currentTimeMillis()))
             }
         )
 
@@ -658,6 +674,8 @@ trait SchemaComponent
             // When customization is removed, remove all sub-customizations
             classCustomizationsOfCustomizations.foreignKeyDeclaration.constrainReference(onDelete cascade)
             propertyCustomizationsOfClasses.foreignKeyDeclaration.constrainReference(onDelete cascade)
+
+            analyzisResultOfAnalyzisName.foreignKeyDeclaration.constrainReference(onDelete cascade)
         }
 
         /**

@@ -39,8 +39,10 @@
     <div class="entity-container">
         <div class="row">
             <h1 class="col-lg-10">@getTitle</h1>
-            <a href="@newEntityCall" class="btn btn-success input-large"><i class="glyphicon-plus glyphicon"></i> Create
-                @entityName &raquo;</a>
+            @if(newEntityCall != null){
+                <a href="@newEntityCall" class="btn btn-success input-large"><i class="glyphicon-plus glyphicon"></i> Create
+                    @entityName &raquo;</a>
+            }
         </div>
 
         @if(entityCount > 0){

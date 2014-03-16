@@ -3,7 +3,7 @@ package cz.payola.web.client.presenters.entity.analysis
 import s2js.adapters.browser._
 import cz.payola.web.client._
 import cz.payola.web.client.views.entity.analysis.AnalysisRunnerView
-import cz.payola.web.shared._
+import cz.payola.web.shared
 import cz.payola.web.client.presenters.components.EvaluationSuccessEventArgs
 import cz.payola.web.client.events._
 import cz.payola.common.entities.Analysis
@@ -11,7 +11,6 @@ import cz.payola.web.client.presenters.graph.GraphPresenter
 import cz.payola.web.client.views.graph.DownloadButtonView
 import cz.payola.web.client.views.bootstrap.modals.AlertModal
 import cz.payola.common._
-import scala.Some
 import cz.payola.common.EvaluationInProgress
 import cz.payola.common.EvaluationError
 import cz.payola.common.EvaluationSuccess
@@ -26,7 +25,7 @@ import cz.payola.web.client.util.UriHashTools
  * @param elementToDrawIn ID of the element to render view into
  * @param analysisId ID of the analysis which will be run
  */
-class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
+class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListUrl: String = "") extends Presenter
 {
     var elapsed = 0
     val parentElement = document.getElementById(elementToDrawIn)
@@ -45,15 +44,19 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     @javascript("""jQuery(".analysis-controls .btn-success").click();""")
     private def autorun(pluginView: String) {}
 
+    @javascript("""window.location.replace(uri);""")
+    private def goToEmbeddingList(uri: String) {}
+
     def initialize() {
         blockPage("Loading analysis data...")
         prefixPresenter.initialize
 
-        DomainData.getAnalysisById(analysisId) {
+        shared.DomainData.getAnalysisById(analysisId) {
             analysis =>
-                val uriEvaluationId = UriHashTools.getUriParameter("evaluation")
+                val uriEvaluationId = UriHashTools.getUriParameter(UriHashTools.evaluationParameter)
+
                 if(uriEvaluationId != "") {
-                    AnalysisRunner.evaluationExists(uriEvaluationId) {exists =>
+                    shared.AnalysisRunner.evaluationExists(uriEvaluationId) {exists =>
                             if(exists) skipEvaluationAndLoadFromCache(uriEvaluationId, analysis)
                             else fatalErrorHandler(new PayolaException("The analysis evaluation does not exist."))}
                     {e => fatalErrorHandler(e)}
@@ -61,8 +64,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
                     createViewAndInit(analysis)
                     unblockPage()
 
-                    if(UriHashTools.getUriParameter("viewPlugin") != "") {
-                        autorun(UriHashTools.getUriParameter("viewPlugin"))
+                    if(UriHashTools.getUriParameter(UriHashTools.viewPluginParameter) != "") {
+                        autorun(UriHashTools.getUriParameter(UriHashTools.viewPluginParameter))
                     } else if(!UriHashTools.isAnyParameterInUri() && UriHashTools.getUriHash() != "") {
                         autorun(UriHashTools.getUriHash())
                     }
@@ -152,9 +155,9 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
 
         val viewPlugin = if(!UriHashTools.isAnyParameterInUri() && UriHashTools.getUriHash() != "") {
             UriHashTools.getUriHash()
-        } else { UriHashTools.getUriParameter("viewPlugin") }
+        } else { UriHashTools.getUriParameter(UriHashTools.viewPluginParameter) }
 
-        getAnalysisEvaluationID.foreach(UriHashTools.setUriParameter("evaluation", _)) //this changes the UriHash
+        getAnalysisEvaluationID.foreach(UriHashTools.setUriParameter(UriHashTools.evaluationParameter, _)) //this changes the UriHash
 
         graphPresenter = new GraphPresenter(view.resultsView.htmlElement, prefixPresenter.prefixApplier, getAnalysisEvaluationID)
         graphPresenter.initialize()
@@ -175,7 +178,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
             uiAdaptAnalysisRunning(view, createViewAndInit _, analysis)
             view.overviewView.controls.timeoutInfo.text = "0"
 
-            AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
+            shared.AnalysisRunner.runAnalysisById(analysisId, evaluationId, true) { id =>
                 unblockPage()
                 elapsed = 0
 
@@ -253,7 +256,8 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
     }
 
     private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id) {
+        val embeddedHash = UriHashTools.getUriParameter(UriHashTools.embeddingUpdateParameter)
+        shared.AnalysisRunner.getEvaluationState(evaluationId, analysis.id, embeddedHash) {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
@@ -339,7 +343,11 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presen
         view.overviewView.controls.runBtn.addCssClass("btn-success")
         view.overviewView.controls.progressBar.setActive(false)
 
-        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.availableVisualTransformators))
+        if(UriHashTools.getUriParameter(UriHashTools.embeddingUpdateParameter) != "" && getAnalysisEvaluationID.isDefined) {
+            goToEmbeddingList(embeddingListUrl) //if the analysis was run from Stored analysis page
+        } else {
+            analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.availableVisualTransformators))
+        }
     }
 
     private def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {

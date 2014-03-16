@@ -9,7 +9,7 @@ import cz.payola.domain.rdf.Graph
 import cz.payola.common.EvaluationSuccess
 
 @remote
-@secured object  AnalysisRunner
+@secured object AnalysisRunner
     extends ShareableEntityManager[Analysis, cz.payola.common.entities.Analysis](Payola.model.analysisModel)
 {
     @async def runAnalysisById(id: String, oldEvaluationId: String,
@@ -23,7 +23,7 @@ import cz.payola.common.EvaluationSuccess
         successCallback(evaluationId)
     }
 
-    @async def getEvaluationState(evaluationId: String, analysisId: String, user: Option[User] = None)
+    @async def getEvaluationState(evaluationId: String, analysisId: String, embeddedHash: String, user: Option[User] = None)
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
@@ -36,7 +36,7 @@ import cz.payola.common.EvaluationSuccess
                 response match {
                     case r: EvaluationSuccess =>
                         Payola.model.analysisResultStorageModel.saveGraph(
-                            r.outputGraph, analysisId, evaluationId, host, user)
+                            r.outputGraph, analysisId, evaluationId, host, user, if(embeddedHash == "") None else Some(embeddedHash) )
                         val availableTransformators: List[String] =
                             TransformationManager.getAvailableTransformations(r.outputGraph)
                         EvaluationCompleted(availableTransformators, r.instanceErrors)
@@ -61,6 +61,12 @@ import cz.payola.common.EvaluationSuccess
         (failCallback: (Throwable => Unit)) {
 
         successCallback(Payola.model.analysisResultStorageModel.exists(evaluationId))
+    }
+
+    @async def embeddingExists(embedId: String, user: Option[User] = None)(successCallback: (Boolean => Unit))
+        (failCallback: (Throwable => Unit)) {
+
+        successCallback(Payola.model.embeddingDescriptionModel.exists(embedId))
     }
 
 

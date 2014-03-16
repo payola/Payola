@@ -6,8 +6,6 @@ import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities.plugins.DataSource
 import cz.payola.domain.entities.settings._
 import cz.payola.domain.DomainException
-import scala.Some
-import scala.Some
 
 /**
   * @param _name Name of the user.
@@ -31,6 +29,8 @@ class User(protected var _name: String)
     type CustomizationType = Customization
 
     type PrefixType = Prefix
+
+    type AnalysisResultType = AnalysisResult
 
     /**
       * Adds the analysis to the users owned analyses. The analysis has to be owned by the user.
@@ -118,6 +118,15 @@ class User(protected var _name: String)
     }
 
     /**
+     * Removes the specified prefix from the users owned prefixes.
+     * @param prefix The prefix to be removed.
+     * @return The removed prefix.
+     */
+    def removeOwnedAnalysisResult(analysisResult: AnalysisResultType): Option[AnalysisResultType] = {
+        removeRelatedEntity(analysisResult, availableAnalysesResults, discardStoredAnalysisResult)
+    }
+
+    /**
      * Returns the users owned entities of the specified class.
      */
     def getOwnedEntities(entityClassName: String): Seq[Entity with NamedEntity] = {
@@ -127,7 +136,8 @@ class User(protected var _name: String)
             Entity.getClassName(classOf[Plugin]) -> ownedPlugins,
             Entity.getClassName(classOf[Customization]) -> ownedCustomizations,
             Entity.getClassName(classOf[Group]) -> ownedGroups,
-            Entity.getClassName(classOf[Prefix]) -> availablePrefixes
+            Entity.getClassName(classOf[Prefix]) -> availablePrefixes,
+            Entity.getClassName(classOf[AnalysisResult]) -> availableAnalysesResults
         ).getOrElse(entityClassName, throw new DomainException("The user doesn't own entities of class " +
             entityClassName + "."))
     }

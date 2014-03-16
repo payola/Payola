@@ -1,6 +1,6 @@
 package cz.payola.data
 
-import cz.payola.common.Entity
+import cz.payola.common._
 import cz.payola.common.entities.ShareableEntity
 import cz.payola.domain.entities._
 import cz.payola.domain.entities.plugins._
@@ -58,6 +58,11 @@ trait DataContextComponent
     val analysisResultRepository: AnalysisResultRepository
 
     /**
+     * A repository to access persisted analyses results embedding data
+     */
+    val embeddingDescriptionRepository: EmbeddingDescriptionRepository
+
+    /**
      * A registry that provides repositories by class name of persisted entity
      */
     lazy val repositoryRegistry = new RepositoryRegistry(Map(
@@ -68,7 +73,9 @@ trait DataContextComponent
         classOf[Plugin] -> pluginRepository,
         classOf[DataSource] -> dataSourceRepository,
         classOf[Customization] -> customizationRepository,
-        classOf[Prefix] -> prefixRepository
+        classOf[Prefix] -> prefixRepository,
+        classOf[EmbeddingDescription] -> embeddingDescriptionRepository,
+        classOf[AnalysisResult] -> analysisResultRepository
     ))
 
     /**
@@ -332,7 +339,7 @@ trait DataContextComponent
 
     trait AnalysisResultRepository extends Repository[AnalysisResult]
     {
-        def storeResult(analysisDescription: AnalysisResult)
+        def storeResult(analysisDescription: AnalysisResult, embeddedHash: Option[String] = None)
 
         def getResult(evaluationId: String, analysisId: String): Option[AnalysisResult]
 
@@ -341,6 +348,27 @@ trait DataContextComponent
         def updateTimestamp(evaluationId: String)
 
         def exists(evaluationId: String): Boolean
+
+        def getAllAvailableToUser(userId: Option[String]): Seq[AnalysisResult]
+    }
+
+    trait EmbeddingDescriptionRepository extends Repository[EmbeddingDescription]
+    {
+        def createEmbeddedUriHash(analysisResult: entities.AnalysisResult): EmbeddingDescription
+
+        def getEmbeddedUriHash(analysisResultId: String): Option[EmbeddingDescription]
+
+        def getAllAvailableToUser(userId: Option[String]): Seq[EmbeddingDescription]
+
+        def getEmbeddedById(embedId: String): Option[EmbeddingDescription]
+
+        def getEmbeddedByUriHash(uriHash: String): Option[EmbeddingDescription]
+
+        def removeByAnalysisId(id: String): Boolean
+
+        def setViewPlugin(id: String, visualPlugin: String): Option[EmbeddingDescription]
+
+        def updateEvaluation(uriHash: String, analysisResultId: String)
     }
 
     /**

@@ -4,11 +4,15 @@ import helpers.Secured
 import cz.payola.domain.entities.User
 import cz.payola.web.shared.Payola
 import play.mvc.Security.Authenticated
+import cz.payola.web.client.util.UriHashTools
 
 object Analysis extends PayolaController with Secured
 {
     def detail(id: String) = maybeAuthenticatedWithRequest { (user, request) =>
-        Payola.model.analysisModel.getById(id).map { a =>
+        //strip hash params
+        val analysisId = UriHashTools.stripParams(id)
+        //search
+        Payola.model.analysisModel.getById(analysisId).map { a =>
             val canTakeOwnership = user.isDefined && a.token.isDefined && request.session.get("analysis-tokens")
                 .map { tokens: String =>
                 tokens.split(",").contains(a.token.get)

@@ -1,6 +1,6 @@
 package cz.payola.domain.entities
 
-import cz.payola.domain.Entity
+import cz.payola.domain._
 import java.sql.Timestamp
 
 class AnalysisResult(
@@ -9,9 +9,26 @@ class AnalysisResult(
     protected override var evaluationid: String,
     protected override var verticescount: Int,
     protected var _touched: Timestamp)
-    extends Entity with cz.payola.common.entities.AnalysisResult
-    with OptionallyOwnedEntity with NamedEntity
+    extends Entity
+    with OptionallyOwnedEntity
+    with NamedEntity
+    with cz.payola.common.entities.AnalysisResult
 {
+    type EmbeddingDescriptionType = EmbeddingDescription
+    type AnalysisType = Analysis
+
+    protected override var _analysis: Option[Analysis] = None
+
+    protected override var _embeddingDescription: Option[EmbeddingDescription] = None
+
+
+    def analysis_=(value: Option[Analysis]) {
+        _analysis = value
+    }
+
+    def embeddingDescription_=(value: Option[EmbeddingDescription]) {
+        _embeddingDescription = value
+    }
 
     override var _name = "http://"+analysisid+"/"+evaluationid
 

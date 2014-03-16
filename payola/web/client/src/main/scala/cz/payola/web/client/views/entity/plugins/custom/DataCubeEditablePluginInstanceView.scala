@@ -136,7 +136,7 @@ class DataCubeEditablePluginInstanceView(analysis: Analysis, pluginInst: PluginI
      * @param callback
      */
     private def pollingHandler(evaluationId: String, callback: (EventArgs[SimpleGraphView] => Unit)) {
-        AnalysisRunner.getEvaluationState(evaluationId, analysis.id) {
+        AnalysisRunner.getEvaluationState(evaluationId, analysis.id, "") {
             state =>
                 state match {
                     case s: EvaluationError => {
