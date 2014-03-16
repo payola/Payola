@@ -133,6 +133,8 @@ angular.module('dataCube.controllers', []).
 
                         angular.forEach(container, function (def, uri) {
 
+                            def.values = [];
+
                             promises.push(DataCubeService.get({queryName: "distinct-values", evaluationId: evaluationId, property: uri, isDate: def.isDate},
                                 function (data) {
 
