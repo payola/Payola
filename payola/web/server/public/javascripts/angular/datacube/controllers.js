@@ -17,6 +17,7 @@ angular.module('dataCube.controllers', []).
             const URI_binding = "http://www.w3.org/2005/sparql-results#binding";
             const URI_variable = "http://www.w3.org/2005/sparql-results#variable";
             const URI_value = "http://www.w3.org/2005/sparql-results#value";
+            const URI_concept = "http://purl.org/linked-data/cube#concept";
 
             $scope.initDone = false;
             $scope.dataStructures = [];
@@ -42,7 +43,9 @@ angular.module('dataCube.controllers', []).
                 yAxis: {
                     title: {
                         text: ""
-                    }
+                    },
+                    currentMin: 0,
+                    currentMax: 100
                 },
                 loading: false
             };
@@ -251,6 +254,8 @@ angular.module('dataCube.controllers', []).
 
                     globalFilters = globalFilters.concat(localFilters);
 
+                    $scope.seriesIndices = {};
+                    var max = 0;
                     DataCubeService.get({queryName: "data", evaluationId: evaluationId, measure: measureUri, dimension: $scope.XAxisDimension.uri, filters: localFilters.map(function (x) {
                         return (x.positive ? "+" : "-") + x.component + "$:$:$" + x.value + "$:$:$" + x.isDate;
                     })}, function (data) {
@@ -272,11 +277,21 @@ angular.module('dataCube.controllers', []).
                                         }
                                     });
 
-                                    serie.data.push({name: $scope.labelsMap[res.d.value] || res.d.value, y: parseInt(res.m.value) });
-                                    $scope.highcharts.xAxis.categories.push($scope.labelsMap[res.d.value]);
+                                    max = Math.max(max, parseInt(res.m.value));
+
+                                    var tick = $scope.labelsMap[res.d.value] || res.d.value;
+
+                                    if(typeof($scope.seriesIndices[tick]) === 'undefined'){
+                                        $scope.seriesIndices[tick] = Object.keys($scope.seriesIndices).length;
+                                        $scope.highcharts.xAxis.categories[$scope.seriesIndices[tick]] = $scope.labelsMap[res.d.value];
+                                    }
+
+                                    serie.data[$scope.seriesIndices[tick]] = {name: tick, y: parseInt(res.m.value) };
                                 }
                             }
                         });
+
+                        $scope.highcharts.yAxis.currentMax = max;
                     });
                 });
 
@@ -396,9 +411,10 @@ angular.module('dataCube.controllers', []).
                                             var c = {
                                                 uri: componentValue[queueItem.uri][0].value,
                                                 label: componentValue[URI_label][0].value,
+                                                concept: (componentValue[URI_concept]||[{value:""}])[0].value,
                                                 values: [],
                                                 isDimension: queueItem.uri == URI_dimension,
-                                                isDate: (componentValue[queueItem.uri][0].value.substr(-6).toLowerCase() == "period"),
+                                                isDate: ((componentValue[URI_concept]||[{value:""}])[0].value == "http://purl.org/linked-data/sdmx/2009/concept#refPeriod") || (componentValue[queueItem.uri][0].value.substr(-6).toLowerCase() == "period"),
                                                 order: parseInt((componentValue[URI_QB_ORDER] || [
                                                     {value: dsdRef[queueItem.arrayIdx].length + 1}
                                                 ])[0].value)

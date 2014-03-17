@@ -183,7 +183,8 @@ trait DataCubeModelComponent
                   |        qb:component ?c3 .
                   |     ?c qb:dimension ?dim ;
                   |        rdfs:label ?l ;
-                  |        qb:order ?dimOrder .
+                  |        qb:order ?dimOrder ;
+                  |        qb:concept ?concept .
                   |     ?c2 qb:measure ?m ;
                   |         rdfs:label ?l2 ;
                   |         qb:order ?mOrder .
@@ -208,6 +209,7 @@ trait DataCubeModelComponent
                   |             qb:order ?aOrder .
                   |     }
                   |
+                  |     OPTIONAL { ?dim qb:concept ?concept . }
                   |     OPTIONAL { ?d rdfs:label ?dsdLabel . FILTER(LANG(?dsdLabel) = 'en') }
                   | }
                 """.stripMargin
