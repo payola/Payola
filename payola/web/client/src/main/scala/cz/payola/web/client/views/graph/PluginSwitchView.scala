@@ -159,7 +159,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[Any]) {
         super.update(graph, customization, serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.setBrowsingURI(browsingURI)
@@ -176,7 +176,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         drawGraph()
     }
 
-    override def updateSerializedGraph(serializedGraph: Option[String]) {
+    override def updateSerializedGraph(serializedGraph: Option[Any]) {
 
         super.updateSerializedGraph(serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
@@ -349,6 +349,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         listItem
     }
 
+    @javascript("""console.log(x)""")
+    def log (x: Any) {}
+
     /**
      * Visualization plugin setter.
      * @param plugin plugin to set
@@ -380,7 +383,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                                     currentGraph = Some(graph)
                                     update(currentGraph, currentCustomization, None)
 
-                                case str: String =>
+                                case str =>
                                     currentGraph = None
                                     currentSerializedGraph = Some(str)
                                     update(None, currentCustomization, currentSerializedGraph)

@@ -125,7 +125,7 @@ class SimpleGraphView(placeholder: ElementView[Element], verticesCount: Int) ext
         }.mkString("\n")
     }
 
-    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[Any]) {
         super.update(graph, customization, None)
         technique.update(graph, customization, None)
         technique.drawGraph()
