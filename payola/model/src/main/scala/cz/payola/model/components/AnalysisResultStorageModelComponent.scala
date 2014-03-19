@@ -36,31 +36,9 @@ trait AnalysisResultStorageModelComponent
                     .filterNot(_.startsWith("http://schema.org"))
             }
             
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None) {
-
-                if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
-                    return
-                }
-
-                val domainGraph = graph.asInstanceOf[cz.payola.domain.rdf.Graph]
-
-                //store control in DB
-                analysisResultRepository.storeResult(new AnalysisResult(
-                    analysisId, user, evaluationId, graph.vertices.size,
-                    new java.sql.Timestamp(System.currentTimeMillis)))
-
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String) {
                 val uri = constructUri(evaluationId)
-
-                val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
-
-                val tmpFile = new File("/opt/www/virtuoso/evaluation/"+evaluationId+".rdf")
-                printToFile(tmpFile)(p => {
-                    p.println(serializedGraph)
-                })
-
-                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
-
-                tmpFile.delete()
+                rdfStorage.storeGraphGraphProtocol(uri, graph.asInstanceOf[cz.payola.domain.rdf.Graph])
             }
 
             /**
