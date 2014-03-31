@@ -305,8 +305,8 @@ angular.module('dataCube.controllers', []).
         $scope.loadData = function () {
 
             $scope.ticks = [];
-            $scope.labelsMap = {};
-            
+            $scope.seriesIndices = {};
+
             var measureUri = $scope.activeMeasure.uri;
 
             var filters = $scope.computeBasicFilters();
