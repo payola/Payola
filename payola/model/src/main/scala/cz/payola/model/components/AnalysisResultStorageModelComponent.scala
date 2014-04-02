@@ -35,8 +35,13 @@ trait AnalysisResultStorageModelComponent
                     .filter(_.uri == "http://www.w3.org/2005/sparql-results#value").map(_.destination.toString)
                     .filterNot(_.startsWith("http://schema.org"))
             }
-            
+
             def saveGraph(graph: Graph, analysisId: String, evaluationId: String) {
+
+                analysisResultRepository.storeResult(new AnalysisResult(
+                    analysisId, user, evaluationId, graph.vertices.size,
+                    new java.sql.Timestamp(System.currentTimeMillis)))
+
                 val uri = constructUri(evaluationId)
                 rdfStorage.storeGraphGraphProtocol(uri, graph.asInstanceOf[cz.payola.domain.rdf.Graph])
             }
