@@ -39,7 +39,7 @@ trait AnalysisResultStorageModelComponent
             def saveGraph(graph: Graph, analysisId: String, evaluationId: String) {
 
                 analysisResultRepository.storeResult(new AnalysisResult(
-                    analysisId, user, evaluationId, graph.vertices.size,
+                    analysisId, None, evaluationId, graph.vertices.size,
                     new java.sql.Timestamp(System.currentTimeMillis)))
 
                 val uri = constructUri(evaluationId)
