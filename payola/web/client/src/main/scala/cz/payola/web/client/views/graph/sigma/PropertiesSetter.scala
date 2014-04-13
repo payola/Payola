@@ -3,28 +3,21 @@ package cz.payola.web.client.views.graph.sigma
 import properties._
 import cz.payola.common.entities.settings._
 import s2js.adapters.js.sigma._
+import s2js.compiler.javascript
+import s2js.adapters.js.sigma
 
 object PropertiesSetter {
 
-    def updateEdge(propertyCustomization: Option[PropertyCustomization], edge: Edge) {
-
-        val colorOpt = if(propertyCustomization.isDefined) Some(propertyCustomization.get.strokeColor) else None
-
-        if(colorOpt.isDefined && colorOpt.get != null && colorOpt.get != "") {
-            edge.color = colorOpt.get
-        } else {
-            edge.color = EdgeProperties.color
-        }
-    }
-
-    def updateNode(classCustomization: Option[ClassCustomization], node: Node) {
-
-        val colorOpt = if(classCustomization.isDefined) Some(classCustomization.get.fillColor) else None
-
-        if(colorOpt.isDefined && colorOpt.get != null && colorOpt.get != "") {
-            node.color = colorOpt.get
-        } else {
-            node.color = NodeProperties.color
-        }
-    }
+    @javascript(
+        """sigmaInstance.graph.nodes().foreach(function(n){
+              if(classCustomizations.isEmpty()) {
+                n.color = '#0088cc';
+              } else {
+                  var foundCustomization = classCustomizations.get().find(function(b){return b.uri == n.id;})
+                  if(foundCustomization.isDefined()){
+                      n.color = foundCustomization.get().fillColor();
+                  }
+              }
+            });""")
+    def updateNodes(classCustomizations: Option[List[ClassCustomization]], sigmaInstance: sigma.Sigma) {}
 }

@@ -8,6 +8,7 @@ object UriHashTools
     val viewPluginParameter = "viewPlugin"
     val evaluationParameter = "evaluation"
     val embeddingUpdateParameter = "embUpdate"
+    val customizationParameter = "cust"
 
     @javascript("""
           if (window.location.hash){
@@ -20,7 +21,9 @@ object UriHashTools
           }
           return '';
                 """)
-    def getUriParameter(name: String) : String = null
+    def getUriParameter(name: String): String = null
+
+    def isParameterSet(name: String): Boolean = getUriParameter(name) != ""
 
     @javascript("""
           var currentHash = self.getCleanUriHash();
@@ -38,6 +41,10 @@ object UriHashTools
           $.bbq.pushState((resultHash + '&' + name + "=" + value));
                 """)
     def setUriParameter(name: String, value: String) {}
+
+    def clearParameter(name: String ) {
+        setUriParameter(name, "")
+    }
 
     @javascript("""
           var splitted = self.getUriHash().split('&');
@@ -84,6 +91,5 @@ object UriHashTools
         } else {
             link
         }
-
     }
 }

@@ -17,6 +17,9 @@ import cz.payola.web.shared.transformators.IdentityTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import s2js.compiler.javascript
 import s2js.adapters.html.Element
+import cz.payola.web.client.views
+import cz.payola.web.client.views.graph.visual.graph._
+import cz.payola.web.client.views.algebra.Point2D
 
 abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph](name, prefixApplier) {
 
@@ -38,6 +41,8 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
     private var parentElement: Option[html.Element] = None
 
     protected val animationStartStopButton = new Button(new Text("Start positioning"), "pull-right", new Icon(Icon.refresh)).setAttribute("style", "margin: 0 5px;")
+
+    protected val graphView = Some(new GraphView(false, prefixApplier))
 
     def createSubViews = List(sigmaPluginWrapper)
 
@@ -76,37 +81,17 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
 
     override def updateCustomization(newCustomization: Option[DefinedCustomization]) {
 
-        /*TODO
         if (sigmaInstance.isDefined) {
-            if(newCustomization.isDefined) {
-                sigmaInstance.get.iterNodes{ node =>
-                    val foundCustomization = newCustomization.get.classCustomizations.find{_.uri == getRdfType(node)}
-                    updateNode(foundCustomization, node) //update configuration of the node
-
-                    foundCustomization.foreach{ classCustomization =>
-                        sigmaInstance.get.iterEdges{ edge =>
-                            if(edge.id.contains(node.label)){
-                                val propertyCustomization = classCustomization.propertyCustomizations.find(_.uri == edge.label)
-                                updateEdge(propertyCustomization, edge) //update configuration of the edge
-                            }
-                        }
-                    }
-                }
-            } else {
-                sigmaInstance.get.graph.nodes.foreach{ node =>
-                    updateNode(None, node)
-                }
-                sigmaInstance.get.graph.edges.foreach{ edge =>
-                    updateEdge(None, edge)
-                }
-            }
-
+            updateNodes(newCustomization.map(_.classCustomizations.toList), sigmaInstance.get)
+            //edges are not customized, since Sigma does not support edge labels
 
             sigmaInstance.get.refresh()
-        }*/
+        }
     }
 
     override def updateGraph(graph: Option[rdf.Graph], contractLiterals: Boolean = true) {
+
+        graph.foreach{modelG => graphView.foreach(_.update(modelG, Point2D.Zero, prefixApplier))}
 
         super.updateGraph(graph, false)
 
@@ -131,7 +116,9 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
                         container: wrapper,
                         settings: {
                             drawEdges: true,
-                            defaultNodeColor: '#0088cc'
+                            defaultNodeColor: '#0088cc',
+                            labelThreshold: 0,
+                            edgeLabels: true
                         }
                    });
                 """)
@@ -155,11 +142,12 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
         props
     }
 
-    protected def createEdgeView(edge: rdf.Edge ): EdgeProperties = {
+    protected def createEdgeView(label: String, edge: rdf.Edge ): EdgeProperties = {
         val props = new EdgeProperties
         props.id = edgesNum+":"+edge.origin.uri+":"+edge.uri
         props.source = edge.origin.uri
         props.target = edge.destination.toString()
+        props.label = label
         edgesNum += 1
 
         props
@@ -189,4 +177,6 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
             modal.render()
         }
     }
+
+    def getGraphView = graphView
 }

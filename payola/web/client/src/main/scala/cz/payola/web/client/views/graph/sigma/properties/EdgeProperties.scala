@@ -6,6 +6,7 @@ class EdgeProperties extends sigma.EdgeProperties{
     var id = ""
     var source = ""
     var target = ""
+    var label = ""
 }
 
 object EdgeProperties {

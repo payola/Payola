@@ -23,6 +23,24 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
 
     def vertexViewElements = _vertexViewElements
 
+    var edgeViewsFiltered: ListBuffer[EdgeView] = edgeViews.foldLeft(ListBuffer[EdgeView]()){ (acc, next) => //je potreba vyfiltrovat hrany, ktere uz byly vykresleny, a maji stejny typ
+        if (acc.exists{edg =>
+            edg.edgeModel.uri == next.edgeModel.uri && edg.isDestination(next.destinationView) && edg.isOrigin(next.originView)
+        }) {
+            acc
+        } else { acc ++ List(next) }
+    }
+
+    private def updateEdgeViewsFiltered() {
+        edgeViewsFiltered = edgeViews.foldLeft(ListBuffer[EdgeView]()){ (acc, next) => //je potreba vyfiltrovat hrany, ktere uz byly vykresleny, a maji stejny typ
+            if (acc.exists{edg =>
+                edg.edgeModel.uri == next.edgeModel.uri && edg.isDestination(next.destinationView) && edg.isOrigin(next.originView)
+            }) {
+                acc
+            } else { acc ++ List(next) }
+        }
+    }
+
     private def vertexViewElements_=(newVerticesList: ListBuffer[VertexViewElement]) {
         _vertexViewElements = newVerticesList
     }
@@ -95,6 +113,8 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         //all (previously) selected vertexViews are now in the group -> select the group
         selectVertex(group)
 
+        updateEdgeViewsFiltered()
+
         getSelected.isEmpty
     }
 
@@ -158,6 +178,10 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
 
         vertexViewElements --= groupsToRemove
         verticesToSelect.foreach(vertexToSelect => selectVertex(vertexToSelect))
+
+        updateEdgeViewsFiltered()
+
+
         ((smthRemoved, vertexLinks))
     }
 
@@ -489,6 +513,8 @@ class Component(private var _vertexViewElements: ListBuffer[VertexViewElement], 
         extensionVertices.foreach{ vertex =>
             vertex.edges = getEdgesOfVertex(vertex, edgeViews)
         }
+
+        updateEdgeViewsFiltered()
     }
 
     private def getEdgesOfVertex(vertexView: VertexViewElement, edgeViews: ListBuffer[EdgeView]): ListBuffer[EdgeView] = {

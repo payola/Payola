@@ -12,6 +12,7 @@ import cz.payola.common.entities.settings._
 import cz.payola.web.client.presenters.entity.settings._
 import cz.payola.common.rdf.IdentifiedVertex
 import cz.payola.web.client.presenters.entity.PrefixPresenter
+import cz.payola.web.client.util.UriHashTools
 
 class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None, analysisId: Option[String] = None) extends Presenter
 {
@@ -36,6 +37,7 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
         view.userCustomizationCleared += onCustomizationClear _
         view.userCustomizationCreateClicked += onUserCustomizationCreateClicked _
         view.userCustomizationEditClicked += onUserCustomizationEditClicked _
+        view.viewPluginChanged += onViewPluginChanged _
 
         view.render(viewElement)
     }
@@ -89,12 +91,13 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
     }
 
     private def onCustomizationSelected(e: EventArgs[DefinedCustomization]) {
-
+        UriHashTools.setUriParameter(UriHashTools.customizationParameter, e.target.id)
         currentCustomization = Some(e.target)
         view.updateCustomization(Some(e.target))
     }
 
     private def onCustomizationClear(e: EventArgs[DefinedCustomization]) {
+        UriHashTools.clearParameter(UriHashTools.customizationParameter)
         currentCustomization = None
         view.updateCustomization(None)
     }
@@ -137,6 +140,19 @@ class GraphPresenter(val viewElement: html.Element, prefixApplier: PrefixApplier
         }
 
         editor.initialize()
+    }
+
+    def onViewPluginChanged(e: EventArgs[_]) {
+        blockPage("Fetching accessible customizations...")
+        Model.customizationsByOwnership { (o, u) =>
+            if(!view.areCustomizatonsSet)
+                view.updateAvailableCustomizations(u, o)
+            val customizations = u.othersCustomizations ++ u.ownedCustomizations.getOrElse(List()) ++ o.othersCustomizations ++ o.ownedCustomizations.getOrElse(List())
+            val customizationId = UriHashTools.getUriParameter(UriHashTools.customizationParameter)
+            val selectedCustomization = customizations.find(_.id == customizationId)
+            view.updateCustomization(selectedCustomization)
+            unblockPage()
+        }(fatalErrorHandler(_))
     }
 
     private def forceUpdateOntologyCustomizations() {

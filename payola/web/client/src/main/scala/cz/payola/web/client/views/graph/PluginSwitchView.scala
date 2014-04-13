@@ -13,7 +13,7 @@ import cz.payola.web.client.views.graph.visual.techniques.gravity.GravityTechniq
 import cz.payola.web.shared.managers._
 import cz.payola.web.client.events._
 import cz.payola.web.client.views.elements.lists.ListItem
-import cz.payola.web.client.views.graph.sigma.GraphSigmaPluginView
+import cz.payola.web.client.views.graph.sigma._
 import cz.payola.web.client.views.graph.datacube._
 import cz.payola.web.client.models.PrefixApplier
 import s2js.compiler.javascript
@@ -23,6 +23,7 @@ import cz.payola.web.client.views.graph.empty.EmptyPluginView
 import cz.payola.web.client.util.UriHashTools
 import cz.payola.web.client.views.d3.packLayout._
 import cz.payola.web.client.views.datacube.DataCubeVisualizer
+import cz.payola.web.client.views
 
 class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[String] = None, analysisId: Option[String]) extends GraphView with ComposedView
 {
@@ -60,6 +61,11 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
      * Event triggered when user customization is edited.
      */
     val userCustomizationEditClicked = new SimpleUnitEvent[UserCustomization]
+
+    /**
+     * Event triggered wher view plugin is changed.
+     */
+    val viewPluginChanged = new SimpleUnitEvent[this.type]
 
     /**
      * List of available visualization plugins.
@@ -268,6 +274,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         customizationsButton.items = items
     }
 
+    def areCustomizatonsSet = customizationsButton != null && customizationsButton.items != null && !customizationsButton.items.isEmpty
+
     def updateLanguages(languagesList: Seq[String]) {
         val listItems = languagesList.map { language =>
             val langText = new Text(language)
@@ -367,6 +375,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             currentPlugin.setEvaluationId(None)
             currentPlugin.setBrowsingURI(None)
 
+            if(UriHashTools.isParameterSet(UriHashTools.customizationParameter))
+                viewPluginChanged.triggerDirectly(this)
+
             //the default visualization is TripleTableView, which has implemented a server-side caching, support for other visualizations will be added with transformation layer
             //now the whole graph has to fetched, this will be taken care of in transformation layer in next cache release iteration
             if(evaluationId.isDefined) {
@@ -400,6 +411,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                 languagesButton.render(toolbar.htmlElement)
                 currentPlugin.renderControls(toolbar.htmlElement)
                 currentPlugin.render(pluginSpace.htmlElement)
+
                 update(currentGraph, currentCustomization, None)
                 currentPlugin.drawGraph()
             }
@@ -412,8 +424,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
     def getCurrentGraph = this.currentGraph
 
-    def getCurrentGraphView = currentPlugin match {
+    def getCurrentGraphView: Option[views.graph.visual.graph.GraphView] = currentPlugin match {
         case visual: VisualPluginView =>
+            visual.getGraphView
+        case visual: SigmaPluginView =>
             visual.getGraphView
         case _ => None
     }

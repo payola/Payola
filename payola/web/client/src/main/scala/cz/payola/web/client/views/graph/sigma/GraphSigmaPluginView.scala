@@ -44,7 +44,8 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
                 setRdfType(node, getRdfTypeForVertexView(graph.edges, idVertex.uri))
                 node
             }.toList
-            val edgeList = graph.edges.filter(_.destination.isInstanceOf[rdf.IdentifiedVertex]).map(createEdgeView(_)).toList
+            val edgeList = graph.edges.filter(_.destination.isInstanceOf[rdf.IdentifiedVertex]).map( edge =>
+                createEdgeView(prefixApplier.map(_.applyPrefix(edge.uri)).getOrElse(edge.uri), edge)).toList
 
             sigmaInstance = Some(initSigma(nodeList, edgeList, wrapper))
 
@@ -184,10 +185,15 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
                 if(!n.hidden){
                   n.trueColor = n.color;
                   n.color = '#999999';
-                  n.hidden = 1;        }
+                  n.hidden = 1;
+                  n.trueLabel = n.label;
+                  n.label = "";
+                }
               }else{
                 n.color = n.hidden ? n.trueColor : n.color;
-                n.hidden = 0;      }
+                n.label = n.hidden ? n.trueLabel : n.label;
+                n.hidden = 0;
+              }
             });
            self.sigmaInstance.get().refresh();""")
     private def hideVertices(event: Unit) {}
@@ -199,10 +205,11 @@ class GraphSigmaPluginView(prefixApplier: Option[PrefixApplier]) extends SigmaPl
             })
             self.sigmaInstance.get().graph.nodes().foreach(function(n){
                 n.color = n.hidden ? n.trueColor : n.color;
+                n.label = n.hidden ? n.trueLabel : n.label;
                 n.hidden = 0;
             })
             self.sigmaInstance.get().refresh();
-            """)
+                """)
     private def showVertices(event: Unit) {}
 
 

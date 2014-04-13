@@ -612,7 +612,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
 
     def draw(canvasPack: CanvasPack, positionCorrection: Vector2D) {
         val vertexViews = getAllVertices
-        val edgeViews = getAllEdges
+        val edgeViews = getAllEdgesForDrawing
 
         var selectedVerticesDrawn = false
         var deselectedVerticesDrawn = false
@@ -641,20 +641,18 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
 
         var selectedEdgesDrawn = false
         var deselectedEdgesDrawn = false
-        edgeViews.foreach {
-            edgeView =>
-
-                if (edgeView.isSelected) {
-                    if (canvasPack.edgesSelected.isClear) {
-                        edgeView.draw(canvasPack.edgesSelected.context, positionCorrection)
-                        selectedEdgesDrawn = true
-                    }
-                } else {
-                    if (canvasPack.edgesDeselected.isClear) {
-                        edgeView.draw(canvasPack.edgesDeselected.context, positionCorrection)
-                        deselectedEdgesDrawn = true
-                    }
+        edgeViews.foreach { edgeView =>
+            if (edgeView.isSelected) {
+                if (canvasPack.edgesSelected.isClear) {
+                    edgeView.draw(canvasPack.edgesSelected.context, positionCorrection)
+                    selectedEdgesDrawn = true
                 }
+            } else {
+                if (canvasPack.edgesDeselected.isClear) {
+                    edgeView.draw(canvasPack.edgesDeselected.context, positionCorrection)
+                    deselectedEdgesDrawn = true
+                }
+            }
         }
         if (selectedEdgesDrawn) {
             canvasPack.edgesSelected.dirty()
@@ -666,7 +664,7 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
 
     def drawQuick(canvasPack: CanvasPack, positionCorrection: Vector2D) {
         val vertexViews = getAllVertices
-        val edgeViews = getAllEdges
+        val edgeViews = getAllEdgesForDrawing
 
         var selectedVerticesDrawn = false
         var deselectedVerticesDrawn = false
@@ -778,6 +776,16 @@ class GraphView(contractLiterals: Boolean = true, prefixApplier: Option[PrefixAp
         components.foreach {
             component =>
                 allEdges ++= component.edgeViews
+        }
+
+        allEdges
+    }
+
+    private def getAllEdgesForDrawing: ListBuffer[EdgeView] = {
+        var allEdges = ListBuffer[EdgeView]()
+        components.foreach {
+            component =>
+                allEdges ++= component.edgeViewsFiltered
         }
 
         allEdges

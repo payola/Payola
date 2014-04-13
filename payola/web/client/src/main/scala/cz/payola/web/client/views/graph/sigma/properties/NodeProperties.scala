@@ -1,6 +1,7 @@
 package cz.payola.web.client.views.graph.sigma.properties
 
 import s2js.adapters.js.sigma
+import cz.payola.common.rdf
 
 class NodeProperties extends sigma.NodeProperties {
     var x: Double = math.random

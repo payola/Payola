@@ -72,6 +72,8 @@ class DataSourceBrowser(
             DataSourceManager.getInitialGraph(dataSourceId) { graph =>
                 graphPresenter.view.updateGraph(graph, true)
                 unblockPage()
+                if(UriHashTools.isParameterSet(UriHashTools.customizationParameter))
+                    graphPresenter.onViewPluginChanged(null)
             }(fatalErrorHandler(_))
 
         }(fatalErrorHandler(_))

@@ -209,12 +209,12 @@ class EdgeView(val edgeModel: Edge, private var _originView: VertexViewElement, 
     }
 
     def isOrigin(vertex: VertexViewElement): Boolean = {
-        _originView.isEqual(vertex) || (if(originBackup.isDefined) {
-            originBackup.get.isEqual(vertex) } else { false })
+        _originView.isEqual(vertex) || _originView.contains(vertex) || (if(originBackup.isDefined) {
+            originBackup.get.isEqual(vertex) || originBackup.get.contains(vertex) } else { false })
     }
 
     def isDestination(vertex: VertexViewElement): Boolean = {
-        _destinationView.isEqual(vertex) || (if(destinationBackup.isDefined) {
-            destinationBackup.get.isEqual(vertex) } else { false })
+        _destinationView.isEqual(vertex) || _destinationView.contains(vertex) || (if(destinationBackup.isDefined) {
+            destinationBackup.get.isEqual(vertex) || destinationBackup.get.contains(vertex) } else { false })
     }
 }
