@@ -17,6 +17,10 @@ class VertexInfoTable(vertex: IdentifiedVertex, language: Option[String], values
 
     var vertexBrowsing = new SimpleUnitEvent[IdentifiedVertex]
 
+    private val tableStyle = "top: %dpx; left: %dpx; z-index: 1000; display:block; overflow:auto; overflow-wrap:break-word; height:250px; width:250px; max-width:none"
+
+    private var table: Option[DefinitionList] = None
+
     def createSubViews: Seq[View] = {
         val buffer = new ArrayBuffer[ElementView[_]]()
 
@@ -46,15 +50,15 @@ class VertexInfoTable(vertex: IdentifiedVertex, language: Option[String], values
             new Heading(List(dataSourceAnchor, new Span(List(new Text(" "))), browsingAnchor), 3, "popover-title")
 
         val popoverContent = if(!values.isEmpty) {
-            new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")
+            table = Some(new DefinitionList(buffer, "").setAttribute("style", "overflow-wrap: break-word; padding: 19px"))
+            new Div(List(table.get), "popover-content")
         } else {
             new Div(List(), "popover-content")
         }
         val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
         val div = new Div(List(popoverInner))
-        div.setAttribute("class", "popover fade in vitable")
-        div.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
+        div.setAttribute("class", "popover fade in resizable")
+        div.setAttribute("style", tableStyle.format(position.y, position.x))
         List(div)
     }
 
@@ -63,7 +67,10 @@ class VertexInfoTable(vertex: IdentifiedVertex, language: Option[String], values
     }
 
     def setPosition(position: Point2D) {
-        blockHtmlElement.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
+        blockHtmlElement.setAttribute("style", tableStyle.format(position.y, position.x))
+    }
+
+    def updateStyle() {
+        table.map(_.setAttribute("style", "overflow-wrap: break-word; padding: 19px"))
     }
 }

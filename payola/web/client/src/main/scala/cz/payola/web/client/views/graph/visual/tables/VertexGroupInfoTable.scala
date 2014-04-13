@@ -18,6 +18,8 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
     var removeVertexFromGroup = new SimpleUnitEvent[VertexViewElement]
     var removeAllFromGroup = new SimpleUnitEvent[List[VertexViewElement]]
     val groupNameField = new TextInput("GroupName", group.getName)
+    private val tableStyle = "top: %dpx; left: %dpx; z-index:1000; display:block; overflow:auto; height:250px; width:250px; max-width: none;"
+    private var verticesListElement: Option[DefinitionList] = None
 
     def createSubViews: Seq[client.View] = {
         val buffer = new ArrayBuffer[ElementView[_]]()
@@ -44,15 +46,15 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
                 new Heading(List(new Text("count: "+group.vertexViews.size), removeAll), 5)), 3, "popover-title")
 
         val popoverContent = if(!buffer.isEmpty) {
-            new Div(List( new DefinitionList(buffer, "unstyled well")), "popover-content")
+            verticesListElement = Some(new DefinitionList(buffer, ""))
+            new Div(List(verticesListElement.get), "")
         } else {
             new Div(List(), "popover-content")
         }
-        val popoverInner = new Div(List(popoverTitle, popoverContent), "popover-inner")
+        val popoverInner = new Div(List(popoverTitle, popoverContent), "")
         val div = new Div(List(popoverInner))
-        div.setAttribute("class", "popover fade in vitable")
-        div.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
+        div.setAttribute("class", "popover fade in resizable")
+        div.setAttribute("style", tableStyle.format(position.y, position.x))
         List(div)
     }
 
@@ -61,7 +63,10 @@ class VertexGroupInfoTable(group: VertexViewGroup, position: Point2D, prefixAppl
     }
 
     def setPosition(position: Point2D) {
-        blockHtmlElement.setAttribute("style",
-            "top: %dpx; left: %dpx; z-index: 1000;".format(position.y, position.x))
+        blockHtmlElement.setAttribute("style", tableStyle.format(position.y, position.x))
+    }
+
+    def updateStyle() {
+        verticesListElement.map(_.setAttribute("style", "margin: 0px; padding: 19px; overflow-wrap: break-word; max-width: none;"))
     }
 }

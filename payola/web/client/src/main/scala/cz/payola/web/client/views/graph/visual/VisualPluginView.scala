@@ -313,6 +313,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
         infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
         infoTable.setPosition(getVertexInfoTablePosition(vertexGroup, infoTable.getSize))
+        infoTable.updateStyle()
     }
 
     private def fetchVertexLinks(uriLinks: List[(String, Point2D)], rerunPositioningTechnique: Boolean) {
@@ -362,6 +363,7 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     infoTable.render(_parentHtmlElement.getOrElse(document.body))
 
                     infoTable.setPosition(getVertexInfoTablePosition(vertexView, infoTable.getSize))
+                    infoTable.updateStyle()
                 }
             }
         }
@@ -377,9 +379,9 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
             }
         } else {
             if (position.y - tableSize.y < 0) {
-                vertexElement.position + Vector2D(-tableSize.x - vertexElement.radius, 0)
+                vertexElement.position + Vector2D(-tableSize.x - 2*vertexElement.radius, 0)
             } else {
-                vertexElement.position + Vector2D(-tableSize.x - vertexElement.radius, -tableSize.y)
+                vertexElement.position + Vector2D(-tableSize.x - 2*vertexElement.radius, -tableSize.y)
             }
         }
     }
@@ -718,9 +720,9 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
     }
 
     override def loadDefaultCachedGraph(evaluationId: String, updateGraphFnc: Option[Graph] => Unit) {
+        View.blockPage("Preparing graph visualization")
         VisualTransformator.transform(evaluationId)
         { graph =>
-            View.blockPage("Loading initial graph")
             updateGraphFnc(graph)
             if(graphView.isEmpty) {
                 _parentHtmlElement.foreach{ htmlParent =>
@@ -734,10 +736,10 @@ abstract class VisualPluginView(name: String, prefixApplier: Option[PrefixApplie
                     var vertexLinks = graphView.get.removeVerticesFromGroup(singleVertices)
                     fetchVertexLinks(vertexLinks, animateAfterGroupsChange.value)
                 } else {
-                    View.unblockPage()
                     drawGraph
                 }
             }
+            View.unblockPage()
         }
         { error =>
             val modal = new FatalErrorModal(error.toString())
