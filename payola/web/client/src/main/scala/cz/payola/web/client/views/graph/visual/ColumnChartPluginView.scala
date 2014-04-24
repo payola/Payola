@@ -10,6 +10,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 import cz.payola.web.shared.transformators.IdentityTransformator
 import cz.payola.common.rdf
+import s2js.adapters.html.Element
 
 class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph]("Column Chart", prefixApplier)
 {
@@ -17,6 +18,9 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
     chartWrapper.id = "chart-wrapper"
 
     private val wrapper = new Div(List(chartWrapper))
+
+    private var legendTitle = ""
+    private var dataSeries = List[List[Any]]()
 
     /**Adds a bars to the chart. Is a list of list with two values - title and value.
      *
@@ -59,9 +63,9 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
                     clickable: true
                 }
           };
-          $.plot($("#chart-wrapper"), data, options);
+          $.plot(element, data, options);
         """)
-    private def createDataTable(arr: List[List[Any]], legendTitle: String) {
+    private def createDataTable(element: Element, arr: List[List[Any]], legendTitle: String) {
 
     }
 
@@ -71,6 +75,7 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
         val height = window.innerHeight - wrapper.offset.y
         val sizeStyle = "width: %dpx; height: %dpx; overflow: auto;".format(width, height)
         wrapper.setAttribute("style", sizeStyle)
+        createDataTable(chartWrapper.blockHtmlElement, dataSeries, legendTitle)
     }
 
     def createPhonyGraph: Graph = {
@@ -130,7 +135,6 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
         // Get those vertices representing bars in the chart
         val bars = g.getIncomingEdges(initialVertex.uri).filter(_.uri == Edge.rdfTypeEdge)
             .map(_.origin)
-        var legendTitle = ""
 
         // Our assumption here is that the graph-as-chart has been validated
         // before being passed here, so no additional checks will be performed
@@ -150,7 +154,7 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
 
         setupDivSizeForColumns(values)
         setupTooltipsWithTitles(values.map(_(0)))
-        createDataTable(values, legendTitle)
+        dataSeries = values
     }
 
     @javascript(
