@@ -73,7 +73,7 @@ GET     /prefix/edit/:id             controllers.Prefix.edit(id)
 POST    /prefix/save-create          controllers.Prefix.saveCreate()
 POST    /prefix/save                 controllers.Prefix.save(id)
 
-GET     /cachestore/list            controllers.CacheStore.list()
+GET     /cachestore/list            controllers.CacheStore.list(page: Int ?= 1)
 GET     /cachestore/delete/:id      controllers.CacheStore.delete(id)
 GET     /cachestore/create/:id      controllers.CacheStore.create(id)
 GET     /cachestore/update/:id      controllers.CacheStore.update(uriHash, id)

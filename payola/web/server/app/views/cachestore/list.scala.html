@@ -22,7 +22,7 @@
 }
 
 @analysisDetailLinkForID(id: String, name: String) = @{
-    <a href={routes.Analysis.detail(id).toString}>{name}</a>
+<a href={routes.Analysis.detail(id).toString}>{name}</a>
 }
 
 @render_flash(flash)
@@ -43,6 +43,7 @@
         val buffer = new scala.xml.NodeBuffer()
         buffer += <td>Analysis</td>
         buffer += <td>Last Update</td>
+        buffer += <td>Result Url</td>
         buffer += <td>Embeded Url</td>
         buffer += <td>Default visual plugin</td>
         buffer += <td>Actions</td>
@@ -59,20 +60,30 @@
         <td class="listing-column-tiny">{
             new java.text.SimpleDateFormat("dd. MMMMM yyyy HH:mm:ss").format(aRes.touched)
         }</td>
-        <td class="listing-column-tiny">{
-            if(aRes.embeddingDescription.isDefined)
-                <a href={routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString} class="btn" id="CacheStoreEmbUri">Open</a>
+        <td>{
+            <a href={routes.Analysis.detail(aRes.analysis.get.id).toString + "#evaluation="+aRes.evaluationId} id={"result"+aRes.evaluationId}>{
+                routes.Analysis.detail(aRes.analysis.get.id).toString + "#evaluation="+aRes.evaluationId}</a>
+            <script>
+                var origin = window.location.origin;
+                document.getElementById('{"result"+aRes.evaluationId}').innerHTML =
+                origin + document.getElementById('{"result"+aRes.evaluationId}').innerHTML;
+            </script>
+            }</td>
+        <td>{
+            if(aRes.embeddingDescription.isDefined) {
+                <a href={routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString} id={"embed"+aRes.embeddingDescription.get.uriHash}>{
+                    routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString}</a>
                 <script>
-                    var uriTail = '{routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString}'
                     var origin = window.location.origin;
-                    document.getElementById('{"CacheStoreEmbUri"}').innerHTML = origin + uriTail;
+                    document.getElementById('{"embed"+aRes.embeddingDescription.get.uriHash}').innerHTML =
+                    origin + document.getElementById('{"embed"+aRes.embeddingDescription.get.uriHash}').innerHTML;
                 </script>
-            else {
+            } else {
                 createLinkForID(e.id)
             }
 
         }</td>
-        <td class="listing-column-tiny" id={"result"+aRes.id}>{
+        <td id={"result"+aRes.id}>{
             if(aRes.embeddingDescription.isDefined) {
                 <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.CacheStorePresenter" type="text/javascript"></script>
                 <script type="text/javascript">
@@ -82,7 +93,7 @@
                 </script>
             }
         }</td>
-        <td>
+        <td class="listing-column-tiny">
             <div class="btn-toolbar">{
                 if(aRes.embeddingDescription.isDefined) {
                     updateLinkForID(aRes.embeddingDescription.get.uriHash, e.id) ++ deleteLinkForID(e.id)

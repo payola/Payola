@@ -4140,6 +4140,9 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .pagination > li {
   display: inline;
 }
+.pagination > ul > li {
+  display: inline;
+}
 .pagination > li > a,
 .pagination > li > span {
   position: relative;
@@ -5174,6 +5177,9 @@ button.close {
   margin-top: 15px;
   text-align: right;
   border-top: 1px solid #e5e5e5;
+  bottom: 5px;
+  position: absolute;
+  width: 100%;
 }
 .modal-footer .btn + .btn {
   margin-bottom: 0;

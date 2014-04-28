@@ -14,11 +14,14 @@ object CacheStore extends PayolaController with Secured
 {
     def list(page: Int = 1) = maybeAuthenticatedWithRequest { (user: Option[User], request) =>
     // Get prefixes from logged user / only general prefixes in proper order (first users, then general)
-        val cached =
+        val cachedPartitions =
             user.map(_.availableAnalysesResults).getOrElse(
                 Payola.model.analysisResultStorageModel.getAllAvailableToUser(None))
-                .sortBy(_.analysisId).reverse.sortBy(p => p.owner.map(_.id)).reverse
+                .sortBy(_.touched).reverse
+                .sortBy(p => p.owner.map(_.id))
+                .partition(x => x.embeddingDescription.isDefined)
 
+        val cached = cachedPartitions._1 ++ cachedPartitions._2
         Ok(views.html.cachestore.list(user, cached, page)(request.flash))
     }
 
