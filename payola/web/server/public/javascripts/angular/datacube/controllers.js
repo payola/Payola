@@ -29,6 +29,8 @@ angular.module('dataCube.controllers', []).
         $scope.filtersString = "";
         $scope.ticks = [];
 
+        $scope.czRegionData = {title:"Mapdata", data: []};
+
         $scope.highcharts = {
             options: {
                 chart: {
@@ -369,6 +371,8 @@ angular.module('dataCube.controllers', []).
                 });
 
                 $scope.fillSeries();
+
+                console.log($scope.ticks);
             });
 
             persistFilterState(globalFilters);
