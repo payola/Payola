@@ -240,7 +240,7 @@ angular.module('dataCube.controllers', []).
 
         $scope.registerTick = function (value) {
             var tick = $scope.labelsMap[value] || value;
-            $scope.ticks.push([tick, $scope.labelsMap[value]]);
+            $scope.ticks.push([tick, $scope.labelsMap[value] || value]);
             return tick;
         };
 
@@ -267,7 +267,14 @@ angular.module('dataCube.controllers', []).
 
                         max = Math.max(max, parseInt(res.m.value));
 
-                        var tick = $scope.registerTick(res.d.value);
+                        var tick;
+                        if(res.d.datatype == "http://www.w3.org/2001/XMLSchema#date"){
+                            tick = $scope.registerTick(res.d.value.substr(0,4));
+                        } else {
+                            tick = $scope.registerTick(res.d.value);
+                        }
+
+
                         dataQueue.push([
                             function (serie, tick, res) {
                                 serie.data[$scope.seriesIndices[tick]] = {name: tick, y: parseInt(res.m.value) }
