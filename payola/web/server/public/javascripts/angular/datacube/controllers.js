@@ -29,6 +29,12 @@ angular.module('dataCube.controllers', []).
         $scope.filtersString = "";
         $scope.ticks = [];
 
+        $scope.mapVisible = false;
+        $scope.chartVisible = true;
+
+        $scope.showMap = function(){ $scope.mapVisible = true; $scope.chartVisible = false; };
+        $scope.showChart = function(){ $scope.mapVisible = false; $scope.chartVisible = true; };
+
         $scope.czRegionData = {title:"Mapdata", data: []};
 
         $scope.highcharts = {
@@ -270,18 +276,21 @@ angular.module('dataCube.controllers', []).
                         max = Math.max(max, parseInt(res.m.value));
 
                         var tick;
+                        var tickVal;
                         if(res.d.datatype == "http://www.w3.org/2001/XMLSchema#date"){
-                            tick = $scope.registerTick(res.d.value.substr(0,4));
+                            tickVal = res.d.value.substr(0,4);
                         } else {
-                            tick = $scope.registerTick(res.d.value);
+                            tickVal = res.d.value;
                         }
+
+                        tick = $scope.registerTick(tickVal);
 
 
                         dataQueue.push([
-                            function (serie, tick, res) {
-                                serie.data[$scope.seriesIndices[tick]] = {name: tick, y: parseInt(res.m.value) }
+                            function (serie, tick, res, tickVal) {
+                                serie.data[$scope.seriesIndices[tick]] = {name: tick, y: parseInt(res.m.value), tickValue: tickVal }
                             },
-                            {serie: serie, tick: tick, res: res}
+                            {serie: serie, tick: tick, res: res, tickValue: tickVal}
                         ]);
                     }
                 }
@@ -367,12 +376,12 @@ angular.module('dataCube.controllers', []).
                 $scope.sortTicks();
                 $scope.computeTicksIndices();
                 angular.forEach(dataQueue, function (x) {
-                    x[0](x[1].serie, x[1].tick, x[1].res);
+                    x[0](x[1].serie, x[1].tick, x[1].res, x[1].tickValue);
                 });
 
                 $scope.fillSeries();
 
-                console.log($scope.ticks);
+                $scope.czRegionData.data = $scope.highcharts.series;
             });
 
             persistFilterState(globalFilters);

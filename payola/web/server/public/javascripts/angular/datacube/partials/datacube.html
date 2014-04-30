@@ -101,20 +101,25 @@
         <button class="btn btn-primary" ng-click="refresh()"><i class="glyphicon glyphicon-refresh"></i> Refresh</button>
 
         <div class="btn-group">
+            <button class="btn btn-default" ng-click="showChart()" ng-class="{'btn-success': chartVisible}"><i class="glyphicon glyphicon-signal"></i> Chart</button>
+            <button class="btn btn-default" ng-click="showMap()" ng-class="{'btn-success': mapVisible}"><i class="glyphicon glyphicon-globe"></i> Map</button>
+        </div>
+
+        <div class="btn-group" ng-show="chartVisible">
             <button class="btn btn-default" ng-click="switchChart('line', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'line'}">Line</button>
             <button class="btn btn-default" ng-click="switchChart('bar', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'bar'}">Bar</button>
             <button class="btn btn-default" ng-click="switchChart('column', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'column'}">Column</button>
             <button class="btn btn-default" ng-click="switchChart('area', true)" ng-class="{'btn-success':highcharts.options.chart.type == 'area'}">Area</button>
             <button class="btn btn-default" ng-disabled="highcharts.series.length > 1" ng-click="switchChart('pie', true); switchPolar(false, true);" ng-class="{'btn-success':highcharts.options.chart.type == 'pie'}">Pie</button>
         </div>
-        <div class="btn-group">
+        <div class="btn-group" ng-show="chartVisible">
             <button class="btn btn-default" ng-click="switchPolar(true, true)" ng-class="{'btn-success':highcharts.options.chart.polar}">Polar</button>
             <button class="btn btn-default" ng-click="switchPolar(false, true)" ng-class="{'btn-success':!highcharts.options.chart.polar}">Normal</button>
         </div>
 
-        <highchart id="chart1" config="highcharts" class="cubechart"></highchart>
+        <highchart id="chart1" config="highcharts" class="cubechart" ng-show="chartVisible"></highchart>
 
-        <cz-region-map data="czRegionData"></cz-region-map>
+        <cz-region-map data="czRegionData" ng-show="mapVisible"></cz-region-map>
 
     </div>
 
