@@ -2,6 +2,7 @@
 
 /* Directives */
 
+
 angular.module('dataCube.directives', [])
     .directive('czRegionMap', [function () {
 
@@ -19,61 +20,61 @@ angular.module('dataCube.directives', [])
                 "Praha", 10, "CZ0100",
                 "Beroun", 46, "CZ0202",
                 "Blansko", 7, "CZ0641",
-                "Brno-mìsto", 38, "CZ0642",
+                "Brno-m?sto", 38, "CZ0642",
                 "Benešov", 53, "CZ0201",
                 "Brno-venkov", 74, "CZ0643",
                 "Bruntál", 3, "CZ0801",
-                "Bøeclav", 48, "CZ064",
-                "Èeské Budìjovice", 36, "CZ0311",
+                "B?eclav", 48, "CZ064",
+                "?eské Bud?jovice", 36, "CZ0311",
                 "Cheb", 0, "CZ0411",
-                "Èeský Krumlov", 67, "CZ0312",
-                "Èeská Lípa", 6, "CZ0511",
+                "?eský Krumlov", 67, "CZ0312",
+                "?eská Lípa", 6, "CZ0511",
                 "Chrudim", 23, "CZ0531",
                 "Chomutov", 14, "CZ0422",
-                "Dìèín", 18, "CZ0421",
+                "D??ín", 18, "CZ0421",
                 "Domažlice", 32, "CZ0321",
                 "Frýdek-Místek", 75, "CZ0802	",
-                "Havlíèkùv Brod", 39, "CZ0631",
+                "Havlí?k?v Brod", 39, "CZ0631",
                 "Hradec Králové", 64, "CZ0521",
                 "Hodonín", 54, "CZ0645",
-                "Jièín", 76, "CZ0522",
+                "Ji?ín", 76, "CZ0522",
                 "Jeseník", 60, "CZ0711",
-                "Jindøichùv Hradec", 42, "CZ0313",
+                "Jind?ich?v Hradec", 42, "CZ0313",
                 "Jihlava", 4, "CZ0632",
                 "Jablonec nad Nisou", 25, "CZ0512",
                 "Kutná Hora", 52, "CZ0205",
                 "Karviná", 73, "CZ0803	",
                 "Kladno", 50, "CZ0203",
-                "Kromìøíž", 2, "CZ0721",
+                "Krom??íž", 2, "CZ0721",
                 "Kolín", 51, "CZ0204",
                 "Klatovy", 33, "CZ0322",
                 "Karlovy Vary", 15, "CZ0412",
                 "Liberec", 22, "CZ0513",
                 "Louny", 21, "CZ0424",
-                "Litomìøice", 16, "CZ0423",
+                "Litom??ice", 16, "CZ0423",
                 "Mladá Boleslav", 58, "CZ0207",
-                "Mìlník", 59, "CZ0206",
+                "M?lník", 59, "CZ0206",
                 "Most", 20, "CZ0425",
                 "Náchod", 5, "CZ0523",
                 "Nymburk", 57, "CZ0208",
-                "Nový Jièín", 66, "CZ0804",
+                "Nový Ji?ín", 66, "CZ0804",
                 "Olomouc", 63, "CZ0712",
                 "Opava", 69, "CZ0805",
                 "Ostrava", 72, "CZ0806",
-                "Pøíbram", 47, "CZ020B",
-                "Pelhøimov", 41, "CZ0633",
+                "P?íbram", 47, "CZ020B",
+                "Pelh?imov", 41, "CZ0633",
                 "Praha-východ", 24, "CZ0209",
                 "Písek", 35, "CZ0314",
-                "Plzeò-jih", 37, "CZ0324",
-                "Plzeò-mìsto", 40, "CZ0323",
-                "Pøerov", 1, "CZ0714",
-                "Plzeò-sever", 43, "CZ0325",
+                "Plze?-jih", 37, "CZ0324",
+                "Plze?-m?sto", 40, "CZ0323",
+                "P?erov", 1, "CZ0714",
+                "Plze?-sever", 43, "CZ0325",
                 "Prachatice", 68, "CZ0315",
                 "Pardubice", 8, "CZ0532",
-                "Prostìjov", 62, "CZ0713",
+                "Prost?jov", 62, "CZ0713",
                 "Praha-západ", 49, "CZ020A",
                 "Rakovník", 45, "CZ020C",
-                "Rychnov nad Knìžnou", 27, "CZ0524",
+                "Rychnov nad Kn?žnou", 27, "CZ0524",
                 "Rokycany", 12, "CZ0326",
                 "Semily", 26, "CZ0514",
                 "Sokolov", 13, "CZ0413",
@@ -83,16 +84,16 @@ angular.module('dataCube.directives', [])
                 "Tábor", 34, "CZ0317",
                 "Tachov", 31, "CZ0327",
                 "Teplice", 11, "CZ0426",
-                "Tøebíè", 55, "CZ0634",
+                "T?ebí?", 55, "CZ0634",
                 "Trutnov", 17, "CZ0525",
-                "Uherské Hradištì", 44, "CZ0722",
+                "Uherské Hradišt?", 44, "CZ0722",
                 "Ústí nad Labem", 19, "CZ0427",
                 "Ústí nad Orlicí", 71, "CZ0534",
                 "Vsetín", 28, "CZ0723",
                 "Vyškov", 29, "CZ0646",
                 "Zlín", 70, "CZ0724",
                 "Znojmo", 56, "CZ0647",
-                "Žïár nad Sázavou", 9, "CZ0635"
+                "Ž?ár nad Sázavou", 9, "CZ0635"
             ];
 
             element.find("path").on("mouseover", function (event) {
@@ -119,7 +120,17 @@ angular.module('dataCube.directives', [])
             function updateFunc(oldval, newval) {
 
                 dataTitle = scope.data.title;
-                SetDataArray(scope.data.data, 0, 1)
+
+                var dataObject=scope.data.data[0].data;
+                var newData=new Array();
+                for(var i=0;i<dataObject.length;i++){
+                    var curObj=dataObject[i];
+                    var lau=curObj.tickValue.substr( curObj.tickValue.lastIndexOf("/")+1 )
+                    newData.push([lau,curObj.y])
+                }
+
+
+                SetDataArray(newData, 0, 1)
 
             }
 
