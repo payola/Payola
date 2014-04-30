@@ -26,7 +26,7 @@ import cz.payola.web.client.util.UriHashTools
  * @param elementToDrawIn ID of the element to render view into
  * @param analysisId ID of the analysis which will be run
  */
-class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListUrl: String = "") extends Presenter
+class AnalysisRunner(elementToDrawIn: String, analysisId: String) extends Presenter
 {
     var elapsed = 0
     val parentElement = document.getElementById(elementToDrawIn)
@@ -44,9 +44,6 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListU
 
     @javascript("""jQuery(".analysis-controls .btn-success").click();""")
     private def autorun(pluginView: String) {}
-
-    @javascript("""window.location.replace(uri);""")
-    private def goToEmbeddingList(uri: String) {}
 
     def initialize() {
         blockPage("Loading analysis data...")
@@ -257,8 +254,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListU
     }
 
     private def pollingHandler(view: AnalysisRunnerView, analysis: Analysis) {
-        val embeddedHash = UriHashTools.getUriParameter(UriHashTools.embeddingUpdateParameter)
-        shared.AnalysisRunner.getEvaluationState(evaluationId, analysis.id, embeddedHash) {
+        shared.AnalysisRunner.getEvaluationState(evaluationId, analysis.id, "") {
             state =>
                 state match {
                     case s: EvaluationInProgress => renderEvaluationProgress(s, view)
@@ -344,11 +340,7 @@ class AnalysisRunner(elementToDrawIn: String, analysisId: String, embeddingListU
         view.overviewView.controls.runBtn.addCssClass("btn-success")
         view.overviewView.controls.progressBar.setActive(false)
 
-        if(UriHashTools.getUriParameter(UriHashTools.embeddingUpdateParameter) != "" && getAnalysisEvaluationID.isDefined) {
-            goToEmbeddingList(embeddingListUrl) //if the analysis was run from Stored analysis page
-        } else {
-            analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.availableVisualTransformators))
-        }
+        analysisEvaluationSuccess.trigger(new EvaluationSuccessEventArgs(analysis, success.availableVisualTransformators))
     }
 
     private def renderEvaluationProgress(progress: EvaluationInProgress, view: AnalysisRunnerView) {

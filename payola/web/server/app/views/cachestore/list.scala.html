@@ -9,9 +9,12 @@
 </div>
 }
 
-@updateLinkForID(uriHash: String, id: String) = @{
-<div class="btn-group">
-    <a href={routes.CacheStore.update(uriHash, id).toString} class="btn"><i class="glyphicon-refresh glyphicon"/> Update</a>
+@updateLinkForID(analysId: String, evalId: String, uriHash: String) = @{
+<div class="btn-group" style="width:92px; height:36px;">
+    <a class="btn"
+        id={"updateButton"+uriHash} onclick={"return cacheStoreUpdateButtonOnClick(this,'"+analysId+"', '"+evalId+"', '"+uriHash+"');"}>
+        <i class="glyphicon-refresh glyphicon" style="width:16px;height:16px;"/> Update</a>
+
 </div>
 }
 
@@ -57,26 +60,22 @@
             val analys = aRes.analysis.get
             analysisDetailLinkForID(analys.id, analys.name)
         }</td>
-        <td class="listing-column-tiny">{
+        <td id={"resultTime"+aRes.evaluationId} class="listing-column-tiny">{
             new java.text.SimpleDateFormat("dd. MMMMM yyyy HH:mm:ss").format(aRes.touched)
         }</td>
         <td>{
-            <a href={routes.Analysis.detail(aRes.analysis.get.id).toString + "#evaluation="+aRes.evaluationId} id={"result"+aRes.evaluationId}>{
-                routes.Analysis.detail(aRes.analysis.get.id).toString + "#evaluation="+aRes.evaluationId}</a>
+            <a id={"result"+aRes.evaluationId}>Evaluation Link</a>
             <script>
-                var origin = window.location.origin;
-                document.getElementById('{"result"+aRes.evaluationId}').innerHTML =
-                origin + document.getElementById('{"result"+aRes.evaluationId}').innerHTML;
+                setAnchorDetail('{"result"+aRes.evaluationId}',
+                    '{routes.Analysis.detail(aRes.analysis.get.id).toString + "#evaluation="+aRes.evaluationId}');
             </script>
             }</td>
         <td>{
             if(aRes.embeddingDescription.isDefined) {
-                <a href={routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString} id={"embed"+aRes.embeddingDescription.get.uriHash}>{
-                    routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString}</a>
+                <a id={"embed"+aRes.embeddingDescription.get.uriHash}>Embedded Link</a>
                 <script>
-                    var origin = window.location.origin;
-                    document.getElementById('{"embed"+aRes.embeddingDescription.get.uriHash}').innerHTML =
-                    origin + document.getElementById('{"embed"+aRes.embeddingDescription.get.uriHash}').innerHTML;
+                    setAnchorDetail('{"embed"+aRes.embeddingDescription.get.uriHash}',
+                        '{routes.CacheStore.embed(aRes.embeddingDescription.get.uriHash).toString}');
                 </script>
             } else {
                 createLinkForID(e.id)
@@ -85,9 +84,9 @@
         }</td>
         <td id={"result"+aRes.id}>{
             if(aRes.embeddingDescription.isDefined) {
-                <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.CacheStorePresenter" type="text/javascript"></script>
+                <script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.cachestore.CacheStorePresenter" type="text/javascript"></script>
                 <script type="text/javascript">
-                    new cz.payola.web.client.presenters.entity.CacheStorePresenter(
+                    new cz.payola.web.client.presenters.entity.cachestore.CacheStorePresenter(
                         document.getElementById('{"result"+aRes.id}'), '{aRes.embeddingDescription.get.id}',
                         '{aRes.embeddingDescription.get.defaultVisualPlugin.getOrElse("")}').initialize();
                 </script>
@@ -96,7 +95,7 @@
         <td class="listing-column-tiny">
             <div class="btn-toolbar">{
                 if(aRes.embeddingDescription.isDefined) {
-                    updateLinkForID(aRes.embeddingDescription.get.uriHash, e.id) ++ deleteLinkForID(e.id)
+                    updateLinkForID(aRes.analysis.get.id, aRes.evaluationId, aRes.embeddingDescription.get.uriHash) ++ deleteLinkForID(e.id)
                 } else {
                     deleteLinkForID(e.id)
                 }
@@ -106,3 +105,5 @@
 null,
 page
 )
+
+<script src="/javaScriptPackage/cz.payola.web.client.presenters.entity.cachestore.EmbeddedUpdater" type="text/javascript"></script>

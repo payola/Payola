@@ -9,6 +9,7 @@ import play.api.data.Forms._
 import views.html
 import cz.payola.common.ValidationException
 import cz.payola.web.client.util.UriHashTools
+import cz.payola.web.client.presenters.entity.cachestore.EmbeddedUpdater
 
 object CacheStore extends PayolaController with Secured
 {
@@ -78,28 +79,6 @@ object CacheStore extends PayolaController with Secured
                 Some(analysisResult.get._1.evaluationId), analysisResult.get._2.defaultVisualPlugin))*/
         } else {
             NotFound("The embedded analysis result does not exist.")
-        }
-    }
-
-    def update(uriHash: String, id: String) = authenticated {user =>
-
-        try
-        {
-            val storedResult = user.availableAnalysesResults.find{stored => stored.id == id}
-            //val embedded = Payola.model.embeddingDescriptionModel.getEmbeddedAnalysisResult(uriHash)
-            if (storedResult.isDefined) {
-                Redirect(routes.Analysis.detail(
-                    storedResult.get.analysisId+"#"+UriHashTools.embeddingUpdateParameter+"="+
-                        storedResult.get.embeddingDescription.get.uriHash)).flashing(
-                    "success" -> "The analysis result has been successfully updated.")
-            }
-            else {
-                NotFound("The analysis result does not exist.")
-            }
-        }
-        catch {
-            case validationExc: ValidationException =>
-                Redirect(routes.CacheStore.list()).flashing("error" -> validationExc.message)
         }
     }
 }

@@ -76,7 +76,6 @@ POST    /prefix/save                 controllers.Prefix.save(id)
 GET     /cachestore/list            controllers.CacheStore.list(page: Int ?= 1)
 GET     /cachestore/delete/:id      controllers.CacheStore.delete(id)
 GET     /cachestore/create/:id      controllers.CacheStore.create(id)
-GET     /cachestore/update/:id      controllers.CacheStore.update(uriHash, id)
 GET     /cachestore/embed/:id       controllers.CacheStore.embed(id)
 
 GET     /error                      controllers.ErrorHandler.error()

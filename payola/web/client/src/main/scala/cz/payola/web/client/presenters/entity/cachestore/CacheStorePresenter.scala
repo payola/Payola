@@ -1,14 +1,14 @@
-package cz.payola.web.client.presenters.entity
+package cz.payola.web.client.presenters.entity.cachestore
 
-import s2js.adapters.html
+import cz.payola.common.entities.EmbeddingDescription
+import cz.payola.domain.entities
 import cz.payola.web.client.Presenter
+import cz.payola.web.client.models.Model
 import cz.payola.web.client.views.bootstrap.InputControl
 import cz.payola.web.client.views.elements.form.fields._
 import cz.payola.web.shared.Payola
-import cz.payola.common.entities.EmbeddingDescription
-import cz.payola.domain.entities
-import cz.payola.web.client.models.Model
 import cz.payola.web.shared.managers.EmbeddingDescriptionManager
+import s2js.adapters.html
 
 class CacheStorePresenter(val viewElement: html.Element, embeddedId: String, defaultPlugin: String) extends Presenter
 {
