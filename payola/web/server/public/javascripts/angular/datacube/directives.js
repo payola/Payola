@@ -18,7 +18,17 @@ angular.module('dataCube.directives', [])
             var mapping = [
                 "Praha", 10, "CZ0100",
                 "Beroun", 46, "CZ0202",
-                "Blansko", 7, "CZ0641"
+                "Blansko", 7, "CZ0641",
+                "Brno-město", 38, "CZ0642",
+                "Benešov", 53, "CZ0201",
+                "Brno-venkov", 74, "CZ0643",
+                "Bruntál", 3, "CZ0801",
+                "Břeclav", 48, "CZ064",
+                "České Budějovice", 36, "CZ0311",
+                "Cheb", 0, "CZ0411",
+                "Český Krumlov", 67, "CZ0312",
+                "Česká Lípa", 6, "CZ0511",
+                "Chrudim", 23, "CZ0531",
             ];
 
             element.find("path").on("mouseover", function (event) {
