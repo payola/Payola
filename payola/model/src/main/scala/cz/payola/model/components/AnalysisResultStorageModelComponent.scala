@@ -5,6 +5,7 @@ import cz.payola.domain.entities.User
 import cz.payola.common.rdf._
 import cz.payola.domain.entities.AnalysisResult
 import cz.payola.data.DataContextComponent
+import scala.collection._
 import cz.payola.domain.entities.plugins.concrete.data.PayolaStorage
 import cz.payola.common.rdf.Graph
 import java.io._
@@ -35,14 +36,8 @@ trait AnalysisResultStorageModelComponent
                     .filterNot(_.startsWith("http://schema.org"))
             }
             
-            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, host: String, user: Option[User] = None,
+            def saveGraph(graph: Graph, analysisId: String, evaluationId: String, user: Option[User] = None,
                 embeddedHash: Option[String] = None) {
-
-                if(!graph.isInstanceOf[cz.payola.domain.rdf.Graph]) {
-                    return
-                }
-
-                val domainGraph = graph.asInstanceOf[cz.payola.domain.rdf.Graph]
 
                 //store control in DB
                 analysisResultRepository.storeResult(new AnalysisResult(
@@ -50,17 +45,7 @@ trait AnalysisResultStorageModelComponent
                     new java.sql.Timestamp(System.currentTimeMillis)), embeddedHash)
 
                 val uri = constructUri(evaluationId)
-
-                val serializedGraph = domainGraph.toStringRepresentation(RdfRepresentation.RdfXml)
-
-                val tmpFile = new File("/opt/www/virtuoso/evaluation/"+evaluationId+".rdf")
-                printToFile(tmpFile)(p => {
-                    p.println(serializedGraph)
-                })
-
-                rdfStorage.storeGraphAtURL(uri, "http://"+host+"/evaluation/"+evaluationId+".rdf")
-
-                tmpFile.delete()
+                rdfStorage.storeGraphGraphProtocol(uri, graph.asInstanceOf[cz.payola.domain.rdf.Graph])
             }
 
             /**

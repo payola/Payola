@@ -4,6 +4,17 @@ import java.sql._
 import cz.payola.domain.rdf._
 import java.io.File
 
+
+import org.apache.http.HttpVersion
+import org.apache.http.protocol.HTTP
+import org.apache.http.entity.StringEntity
+import org.apache.http.message.BasicHeader
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.auth.{UsernamePasswordCredentials, AuthScope}
+import org.apache.commons.io.IOUtils
+
+
 /**
  * A Virtuoso data store that performs operations above both of the RDF data store and the Virtuoso SQL database.
  * @param server The Virtuoso server.
@@ -46,6 +57,27 @@ class VirtuosoStorage(
 
     def storeGraphAtURL(graphURI: String, graphURL: String) {
         executeSQL("DB.DBA.RDF_LOAD_RDFXML(http_get('%s'), '', '%s')".format(graphURL, escapeString(graphURI)))
+    }
+
+    def storeGraphGraphProtocol(graphURI: String, graph: Graph){
+        val httpSuffix = if(endpointUsesSSL){"s"}else{""}
+        val requestUri = String.format("http%s://%s:%s/sparql-graph-crud-auth?graph-uri=%s", httpSuffix, server, endpointPort.toString, graphURI)
+
+        val creds = new UsernamePasswordCredentials(sqlUsername, sqlPassword)
+        val httpclient = new DefaultHttpClient()
+        val post = new HttpPost(requestUri)
+        post.addHeader("X-Requested-Auth", "Digest")
+        post.addHeader("Content-Type", "application/xml")
+        try {
+
+            httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds)
+            val stringEntity = new StringEntity( graph.toStringRepresentation(RdfRepresentation.RdfXml) , "UTF-8")
+            stringEntity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/xml"))
+            post.setEntity(stringEntity)
+            httpclient.execute(post)
+        } finally {
+            httpclient.getConnectionManager().shutdown()
+        }
     }
 
     def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type) {

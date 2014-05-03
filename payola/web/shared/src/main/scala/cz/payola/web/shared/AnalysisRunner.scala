@@ -26,16 +26,13 @@ import cz.payola.common.EvaluationSuccess
         (successCallback: (EvaluationState => Unit))
         (failCallback: (Throwable => Unit)) {
 
-        //val host = "live.payola.cz"
-        val host = "localhost:9000"
-
         val resultResponse =
             try{
                 val response = Payola.model.analysisModel.getEvaluationState(evaluationId, user)
                 response match {
                     case r: EvaluationSuccess =>
                         Payola.model.analysisResultStorageModel.saveGraph(
-                            r.outputGraph, analysisId, evaluationId, host, user, if(embeddedHash == "") None else Some(embeddedHash) )
+                            r.outputGraph, analysisId, evaluationId, user, if(embeddedHash == "") None else Some(embeddedHash))
                         val availableTransformators: List[String] =
                             TransformationManager.getAvailableTransformations(r.outputGraph)
                         EvaluationCompleted(availableTransformators, r.instanceErrors)

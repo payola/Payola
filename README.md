@@ -9,6 +9,10 @@ For more information about functions and features of the Payola, please refer to
 
 ![Payola overview](https://raw.github.com/siroky/Payola/develop/docs/img/screenshots/payola_overview.png)
 
+## Ready to give it a try? See our sample visualizations
+- [Map visualization](http://vis.payola.cz/coi-gmaps) - Inspections of [CTIA](http://www.coi.cz/en/) - Czech Trade Inspection Agency - shown on a Google map with filtering capabilities
+- [Treemap](http://vis.payola.cz/coi-treemap) - Inspections of [CTIA](http://www.coi.cz/en/) - Czech Trade Inspection Agency - by regions with sanction amount
+
 ## Should you be interested in Payola?
 
 If you work with RDF data on a daily basis, yes, you should. Payola may help you simplify or automatize some tasks. Also the visualizations may be used when describing linked data to people who are not that familiar with them.
@@ -44,9 +48,15 @@ Voilà! Your Payola server is running. The initializer project sets up your data
 
 ## Authors & License
 
-© Copyright 2012
+© Copyright 2014
 
-- [Jirka Helmich](https://github.com/teuzz)
+### Project lead
+
+- [Jirka Helmich](https://github.com/jirihelmich)
+- [Jakub Klímek](https://github.com/jakubklimek)
+- [Martin Nečaský](http://www.ksi.mff.cuni.cz/~necasky)
+ 
+### Developers
 - [Ondra Heřmánek](https://github.com/onashackem)
 - [Ondřej Kudláček](https://github.com/kudlondr)
 - [Honza Široký](https://github.com/siroky)

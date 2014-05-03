@@ -19,7 +19,7 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 /**
  * @author Jiri Helmich
  */
-abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("Map", prefixApplier) {
+abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Any]("Map", prefixApplier) {
 
     val primaryFacetChanged = new SimpleBooleanEvent[MapFacet]
 
@@ -59,7 +59,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
         }
     }
 
-    override def updateSerializedGraph(serializedGraph: Option[String]) {
+    override def updateSerializedGraph(serializedGraph: Option[Any]) {
         RdfJsonTransformator.queryProperties(evaluationId.get, "select distinct ?p where {[] <http://schema.org/geo> []; ?p [] .}"){ properties =>
 
             facets = properties.map{ p =>
@@ -141,7 +141,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
           coll.internalJsArray = places;
           self.markerData = coll;
         """)
-    def parseJSON(json: String) {}
+    def parseJSON(json: Any) {}
 
     def createSubViews = {
         List(facetPlaceholder, mapPlaceholder)
@@ -153,7 +153,7 @@ abstract class MapView(prefixApplier: Option[PrefixApplier] = None) extends Plug
          success() //TODO when is available????
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Any] => Unit) {
         RdfJsonTransformator.getCompleteGraph(evaluationId)(updateGraph(_)) //TODO default graph and paginating
         { error =>
             val modal = new FatalErrorModal(error.toString())

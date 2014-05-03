@@ -11,13 +11,13 @@ import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 /**
  * @author Jiri Helmich
  */
-class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("Sunburst", prefixApplier) {
+class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView[Any]("Sunburst", prefixApplier) {
 
     val d3Placeholder = new Div(List())
     val placeholder = new Div(List(d3Placeholder))
     d3Placeholder.setAttribute("id","d3-placeholder")
 
-    private var _serializedGraph = ""
+    private var _serializedGraph : Any = ""
     private var _rendered = false
 
     @javascript("""console.log(str)""")
@@ -27,7 +27,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView[S
     def intval(str: String) : Int = 0
 
 
-    override def updateSerializedGraph(serializedGraph: Option[String]) {
+    override def updateSerializedGraph(serializedGraph: Option[Any]) {
         serializedGraph.map{ sg =>
             _serializedGraph = sg
             d3Placeholder.removeAllChildNodes()
@@ -164,7 +164,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView[S
 
 
         """)
-    def parseJSON(json: String) {}
+    def parseJSON(json: Any) {}
 
     def createSubViews = List(placeholder)
 
@@ -183,7 +183,7 @@ class Sunburst(prefixApplier: Option[PrefixApplier] = None) extends PluginView[S
         success() //TODO whe is available????
     }
 
-    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[String] => Unit) {
+    override def loadDefaultCachedGraph(evaluationId: String, updateGraph: Option[Any] => Unit) {
         RdfJsonTransformator.getCompleteGraph(evaluationId)(updateGraph(_)) //TODO default graph and paginating
         { error =>
             val modal = new FatalErrorModal(error.toString())

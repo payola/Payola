@@ -66,7 +66,7 @@ class JenaGraph(model: Model)
         _payolaGraph.get
     }
 
-    private[rdf] def getModel: Model = {
+   def getModel: Model = {
         //model
         ModelFactory.createDefaultModel().add(model)
     }

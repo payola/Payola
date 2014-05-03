@@ -78,9 +78,16 @@ trait DataCubeModelComponent
                 val negativeFilters = filters.filter(_.startsWith("-")).map {
                     f =>
                         val parts = f.substring(1).split("\\$:\\$:\\$")
-                        val v = gen.apply()
-                        String.format( """ OPTIONAL { %s <%s> %s . FILTER (?x = %s) } FILTER ( !BOUND(%s) ) """, v,
-                            parts(0), parts(1), v, v)
+                        if (parts(2) == "true") {
+                            val dateVar = gen.apply()
+                            String
+                                .format(" BIND(SUBSTR(str(?d),1,4) AS %s) FILTER(%s != %s) ", dateVar, dateVar, parts(1))
+                        } else {
+
+                            val v = gen.apply()
+                            String.format( """ OPTIONAL { %s <%s> %s . FILTER (?x = %s) } FILTER ( !BOUND(%s) ) """, v,
+                                parts(0), parts(1), v, v)
+                        }
                 }.mkString( """ """)
 
                 val q = String.format(
@@ -183,7 +190,8 @@ trait DataCubeModelComponent
                   |        qb:component ?c3 .
                   |     ?c qb:dimension ?dim ;
                   |        rdfs:label ?l ;
-                  |        qb:order ?dimOrder .
+                  |        qb:order ?dimOrder ;
+                  |        qb:concept ?concept .
                   |     ?c2 qb:measure ?m ;
                   |         rdfs:label ?l2 ;
                   |         qb:order ?mOrder .
@@ -208,6 +216,7 @@ trait DataCubeModelComponent
                   |             qb:order ?aOrder .
                   |     }
                   |
+                  |     OPTIONAL { ?dim qb:concept ?concept . }
                   |     OPTIONAL { ?d rdfs:label ?dsdLabel . FILTER(LANG(?dsdLabel) = 'en') }
                   | }
                 """.stripMargin

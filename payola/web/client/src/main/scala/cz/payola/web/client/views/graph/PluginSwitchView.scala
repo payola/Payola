@@ -87,7 +87,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new Sunburst(Some(prefixApplier)),
         new ZoomableSunburst(Some(prefixApplier)),
         new ZoomableTreemap(Some(prefixApplier)),
-        new DataCubeVisualizer(Some(prefixApplier))
+        new DataCubeVisualizer(Some(prefixApplier)),
+        new ForceDirectGraph(Some(prefixApplier))
     )
 
     /**
@@ -160,7 +161,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
 
     def createSubViews = List(toolbar, pluginSpace)
 
-    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[String]) {
+    override def update(graph: Option[Graph], customization: Option[DefinedCustomization], serializedGraph: Option[Any]) {
         super.update(graph, customization, serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
         currentPlugin.setBrowsingURI(browsingURI)
@@ -177,7 +178,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         drawGraph()
     }
 
-    override def updateSerializedGraph(serializedGraph: Option[String]) {
+    override def updateSerializedGraph(serializedGraph: Option[Any]) {
 
         super.updateSerializedGraph(serializedGraph)
         currentPlugin.setEvaluationId(evaluationId)
@@ -352,6 +353,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         listItem
     }
 
+    @javascript("""console.log(x)""")
+    def log (x: Any) {}
+
     /**
      * Visualization plugin setter.
      * @param plugin plugin to set
@@ -384,7 +388,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
                                     currentGraph = Some(graph)
                                     update(currentGraph, currentCustomization, None)
 
-                                case str: String =>
+                                case str =>
                                     currentGraph = None
                                     currentSerializedGraph = Some(str)
                                     update(None, currentCustomization, currentSerializedGraph)
@@ -424,6 +428,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
             visual.getGraphView
         case _ => None
     }
+
+
+    @javascript(""" ga('send', 'event', 'Visualization', 'Show', visualizationName); """)
+    def analyticsHit(visualizationName: String) {}
 
     /**
      * Each pluginView checks for its pair transformator in availableTransformations and if it is present in the list

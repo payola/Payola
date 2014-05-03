@@ -235,6 +235,25 @@ object DatabaseInitializer extends App
             }
         }
 
+
+        val populatedCities = new cz.payola.domain.entities.Analysis("Populated cities", Some(admin))
+        populatedCities.isPublic = true
+        val populatedCitiesPersisted = model.analysisRepository.persist(populatedCities)
+
+        val populatedcitiesFetcher = sparqlEndpointPlugin.createInstance().setParameter(
+            SparqlEndpointFetcher.endpointURLParameter, "http://dbpedia.org/sparql")
+        val populatedcitiesTyped = typedPlugin.createInstance().setParameter(
+            Typed.typeURIParameter, "http://dbpedia.org/ontology/City")
+        val populatedcitiesPropertySelection = propertySelectionPlugin.createInstance().setParameter(
+            PropertySelection.propertyURIsParameter,
+            "http://dbpedia.org/ontology/populationAsOf\nhttp://dbpedia.org/ontology/populationTotal")
+
+        populatedCitiesPersisted.addPluginInstances(populatedcitiesFetcher, populatedcitiesTyped, populatedcitiesPropertySelection)
+        populatedCitiesPersisted.addBinding(populatedcitiesFetcher,populatedcitiesTyped)
+        populatedCitiesPersisted.addBinding(populatedcitiesTyped,populatedcitiesPropertySelection)
+
+
+
         model.customizationRepository.persist(customization)
     }
 

@@ -204,7 +204,8 @@ object PayolaBuild extends Build
                 "com.h2database" % "h2" % "1.3.165",
                 "mysql" % "mysql-connector-java" % "5.1.18",
                 "postgresql" % "postgresql" % "9.1-901.jdbc4",
-                "org.apache.derby" % "derby" % "10.8.2.2"
+                "org.apache.derby" % "derby" % "10.8.2.2",
+                "org.scalaj" % "scalaj-http_2.9.2" % "0.3.14"
             )
         )
     ).dependsOn(

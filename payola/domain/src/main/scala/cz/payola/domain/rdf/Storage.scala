@@ -38,6 +38,8 @@ trait Storage
      */
     def storeGraphFromFile(graphURI: String, file: File, fileType: RdfRepresentation.Type)
 
+    def storeGraphGraphProtocol(graphURI: String, graph: Graph)
+
     /**
       * Adds a graph with the specified URI to the specified group. A graph with must already exist on the server.
       * @param graphURI URI of the graph.

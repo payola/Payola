@@ -62,7 +62,7 @@ abstract class Graph(vertices: immutable.Seq[Vertex], edges: immutable.Seq[Edge]
      * it is done.
      * @return Model representing this graph.
      */
-    private[rdf] def getModel : Model
+    def getModel : Model
 
     protected def makeGraph(representation: RdfRepresentation.Type, rdf: String): Graph
 
