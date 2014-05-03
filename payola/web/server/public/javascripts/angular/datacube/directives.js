@@ -16,45 +16,9 @@ angular.module('dataCube.directives', [])
             }
 
             var mapping = [
-                "Náchod", 5, "CZ0523",
-                "Nymburk", 57, "CZ0208",
-                "Nový Jičín", 66, "CZ0804",
-                "Olomouc", 63, "CZ0712",
-                "Opava", 69, "CZ0805",
-                "Ostrava", 72, "CZ0806",
-                "Příbram", 47, "CZ020B",
-                "Pelhřimov", 41, "CZ0633",
-                "Praha-východ", 24, "CZ0209",
-                "Písek", 35, "CZ0314",
-                "Plzeň-jih", 37, "CZ0324",
-                "Plzeň-město", 40, "CZ0323",
-                "Přerov", 1, "CZ0714",
-                "Plzeň-sever", 43, "CZ0325",
-                "Prachatice", 68, "CZ0315",
-                "Pardubice", 8, "CZ0532",
-                "Prostějov", 62, "CZ0713",
-                "Praha-západ", 49, "CZ020A",
-                "Rakovník", 45, "CZ020C",
-                "Rychnov nad Kněžnou", 27, "CZ0524",
-                "Rokycany", 12, "CZ0326",
-                "Semily", 26, "CZ0514",
-                "Sokolov", 13, "CZ0413",
-                "Strakonice", 30, "CZ0316",
-                "Šumperk", 61, "CZ0715",
-                "Svitavy", 65, "CZ0533",
-                "Tábor", 34, "CZ0317",
-                "Tachov", 31, "CZ0327",
-                "Teplice", 11, "CZ0426",
-                "Třebíč", 55, "CZ0634",
-                "Trutnov", 17, "CZ0525",
-                "Uherské Hradiště", 44, "CZ0722",
-                "Ústí nad Labem", 19, "CZ0427",
-                "Ústí nad Orlicí", 71, "CZ0534",
-                "Vsetín", 28, "CZ0723",
-                "Vyškov", 29, "CZ0646",
-                "Zlín", 70, "CZ0724",
-                "Znojmo", 56, "CZ0647",
-                "Žďár nad Sázavou", 9, "CZ0635"
+                "Praha", 10, "CZ0100",
+                "Beroun", 46, "CZ0202",
+                "Blansko", 7, "CZ0641"
             ];
 
             element.find("path").on("mouseover", function (event) {
