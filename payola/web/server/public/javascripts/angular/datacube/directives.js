@@ -24,7 +24,7 @@ angular.module('dataCube.directives', [])
                 "Benešov", 53, "CZ0201",
                 "Brno-venkov", 74, "CZ0643",
                 "Bruntál", 3, "CZ0801",
-                "Bøeclav", 48, "CZ064",
+                "Břeclav", 48, "CZ064",
                 "České Budějovice", 36, "CZ0311",
                 "Cheb", 0, "CZ0411",
                 "Český Krumlov", 67, "CZ0312",
