@@ -16,6 +16,11 @@ angular.module('dataCube.directives', [])
             }
 
             var mapping = [
+                "Praha", 10, "CZ0100",
+                "Beroun", 46, "CZ0202",
+                "Blansko", 7, "CZ0641",
+                "Brno-mesto", 38, "CZ0642",
+                "Benesov", 53, "CZ0201",
                 "Brno-venkov", 74, "CZ0643",
                 "Brunt\u00e1l", 3, "CZ0801",
                 "B\u0159eclav", 48, "CZ064",
@@ -25,7 +30,7 @@ angular.module('dataCube.directives', [])
                 "\u010cesk\u00e1 L\u00edpa", 6, "CZ0511",
                 "Chrudim", 23, "CZ0531",
                 "Chomutov", 14, "CZ0422",
-                "D\u011b\u010d\u00edn", 18, "CZ0421",
+                "Decin", 18, "CZ0421",
                 "Doma\u017elice", 32, "CZ0321",
                 "Fr\u00fddek-M\u00edstek", 75, "CZ0802",
                 "Havl\u00ed\u010dk\u016fv Brod", 39, "CZ0631",
@@ -96,7 +101,7 @@ angular.module('dataCube.directives', [])
             });
 
             element.find("path").on("mousemove", function (e) {
-                scope.ttLeft = e.pageX + 20;
+                scope.ttLeft = e.pageX - 415;
                 scope.ttTop = e.pageY + 20;
                 scope.ttShow = "block";
                 scope.$apply();
@@ -376,8 +381,11 @@ angular.module('dataCube.directives', [])
                 }
                 if (value == null) {
                     value = "";
-
                 }
+                if (value2 == null) {
+                    value2 = "";
+                }
+
                 try {
                     var el = element.find("path");
                     for (i = 0; i < el.length; i++) {
