@@ -45,7 +45,7 @@ class ForceDirectGraph(prefixApplier: Option[PrefixApplier] = None) extends Plug
 
     @javascript(
         """
-       $('#property').append('<h3>Properties</h3>').append('<div id="prop"><div>');
+       $('#property').append('<h3>Properties</h3>').append('<a href="#" class="show-label btn btn-primary btn-xs">Show label</a>').append('<div id="prop"><div>');
        $('#property').css("word-break","break-all");
 
        var WIDTH = 900;
@@ -64,6 +64,7 @@ class ForceDirectGraph(prefixApplier: Option[PrefixApplier] = None) extends Plug
         var propertiesQeueu = [];
         var group = 1;
         var bigGraph = bigGraph;
+
 
         var node = {"name": "","group": 1 ,"properties": [], "line": []};
         for (key in mainId) {
@@ -154,16 +155,15 @@ class ForceDirectGraph(prefixApplier: Option[PrefixApplier] = None) extends Plug
     nodeFontSize = 14;
 
     function redraw() {
-
     var ar = d3.event.translate;
-
     var tmp = ar[0]+ ","+ ar[1];
+
         vis.attr("transform",
             "translate(" + tmp + ")"
                 + " scale(" + d3.event.scale + ")");
     }
 
-    var draw = function(json) {
+    var draw = function(json,label) {
         var force = d3.layout.force()
             .charge(-120)
             .linkDistance(30)
@@ -190,7 +190,12 @@ class ForceDirectGraph(prefixApplier: Option[PrefixApplier] = None) extends Plug
             .attr("r",3)
             .style("fill", "#1C2194")
             .call(force.drag);
-
+         if(label)
+         {
+            var text = vis.selectAll(".text").data(json.nodes).enter().append("text")
+            .attr("class","text").text(function(d){return d.name;})
+            .call(force.drag);
+         }
 
         node.append("title")
             .text(function(d) { return d.name; });
@@ -216,9 +221,38 @@ class ForceDirectGraph(prefixApplier: Option[PrefixApplier] = None) extends Plug
 
             node.attr("cx", function(d) { return d.x; })
                 .attr("cy", function(d) { return d.y; });
+
+           if(label)
+           {
+                 text.attr("dx", function(d) { return d.x+5; })
+                .attr("dy", function(d) { return d.y+5; });
+                }
         });
     };
-           draw(graph);
+    var label = true;
+           draw(graph,label);
+
+
+       $('.show-label').live('click',function(){
+        label = !label;
+         d3.select("svg").remove();
+
+        vis = d3.select("#chart") //svg
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("pointer-events", "all")
+            .append('svg:g')
+        .call(d3.behavior.zoom().on("zoom", redraw))
+            .append('svg:g');
+
+        vis.append('svg:rect')
+        .attr('width', w)
+        .attr('height', h)
+        .attr('fill', 'white');
+
+        draw(graph,label);
+    });
 
     $('.node').live('click',function(){
 
