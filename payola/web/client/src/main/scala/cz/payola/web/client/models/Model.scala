@@ -220,10 +220,7 @@ object Model
                 customizations.ontologyCustomizations.ownedCustomizations.foreach { owned =>
                     val c = mutable.ListBuffer.empty[OntologyCustomization]
                     owned.foreach(c += _)
-                    if(!c.isEmpty)
-                        _ownedOntologyCustomizations = Some(c)
-                    else
-                        _ownedOntologyCustomizations = None
+                    _ownedOntologyCustomizations = Some(c)
                 }
                 _othersOntologyCustomizations = customizations.ontologyCustomizations.othersCustomizations
                 _ontologyCustomizationsAreLoaded = true
@@ -231,10 +228,7 @@ object Model
                 customizations.userCustomizations.ownedCustomizations.foreach { owned =>
                     val c = mutable.ListBuffer.empty[UserCustomization]
                     owned.foreach(c += _)
-                    if(!c.isEmpty)
-                        _ownedUserCustomizations = Some(c)
-                    else
-                        _ownedUserCustomizations = None
+                    _ownedUserCustomizations = Some(c)
                 }
                 _othersUserCustomizations = customizations.userCustomizations.othersCustomizations
                 _userCustomizationsAreLoaded = true

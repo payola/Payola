@@ -296,8 +296,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
         val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
+        anchor.setAttribute("style", "line-height:34px;")
 
         val listItem = new ListItem(List(anchor))
+        listItem.setAttribute("style", "line-height:34px;")
         if (currentCustomization.exists(_ == customization)) {
             listItem.addCssClass("active")
         }
@@ -320,8 +322,10 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         val editButton = new Button(new Text("Edit"), "btn-mini", new Icon(Icon.pencil)).setAttribute(
             "style", "position: absolute; right: 5px;")
         val anchor = new Anchor(List(new Text(customization.name)) ++ (if (isEditable) List(editButton) else Nil))
+        anchor.setAttribute("style", "line-height:34px;")
 
         val listItem = new ListItem(List(anchor))
+        listItem.setAttribute("style", "line-height:34px;")
         if (currentCustomization.exists(_ == customization)) {
             listItem.addCssClass("active")
         }
