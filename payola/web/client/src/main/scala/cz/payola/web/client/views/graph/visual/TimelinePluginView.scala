@@ -35,9 +35,11 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
 
     }
 
-    /**Adds a bars to the chart. Is a list of list with two values - title and value.
-     *
-     * @param arr Bars to be displayed.
+    /**
+     * @param element Wrapper for timeline
+     * @param arr Array of timeline events, each item is a list with the title, date and description
+     * @param legendTitle Title on the first non-event timeline element
+     * @param legendDescription Description for the first non-event timeline element
      */
     @javascript(
         """
@@ -90,7 +92,6 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
             val timelineVertices = g.getIncomingEdges(v.uri)
             // The initial vertex should have no outgoing edges (tree root)
             // Every timeline vertex should contain a date and title
-            log("trying " + v.uri)
             g.getOutgoingEdges(v.uri).find(e => Edge.rdfLabelEdges.contains(e.uri)).size > 0 &&
                 timelineVertices.size > 1 && timelineVertices.forall { e =>
                 e.origin match {
@@ -109,15 +110,14 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
     }
 
     private def setGraphContentWithInitialVertex(g: Graph, initialVertex: IdentifiedVertex) {
-        // Get those vertices representing bars in the chart
-        val bars = g.getIncomingEdges(initialVertex.uri)/*.filter(_.uri == Edge.rdfTypeEdge)*/
-            .map(_.origin)
+        // Find event nodes (they point to the root node)
+        val events = g.getIncomingEdges(initialVertex.uri).map(_.origin)
         val initialVertexOutgoing = g.getOutgoingEdges(initialVertex.uri)
         legendTitle = initialVertexOutgoing
             .find(e => Edge.rdfLabelEdges.contains(e.uri))
             .map(e => e.destination.asInstanceOf[LiteralVertex].value.toString).getOrElse(initialVertex.uri)
         legendDescription = htmlListFromEdges(initialVertexOutgoing)
-        val values = bars.map { v =>
+        val values = events.map { v =>
             // Each vertex should have an edge with the title and one with the date
             // Both edges point to literal vertices (due to prior assumed validations)
             // Apart from these two, other outgoing edges are added to the visualization
@@ -169,7 +169,7 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
     }
 
     /**
-     * Validate edge has a label and date
+     * Validate edge has a label and date (thus being an event node)
      * @param edges list of outgoing edges
      * @return true if item contains at least one label and at least one date property
      */
