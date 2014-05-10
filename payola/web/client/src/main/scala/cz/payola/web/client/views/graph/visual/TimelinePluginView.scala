@@ -15,6 +15,8 @@ import s2js.adapters.html.Element
 /**
  * The timeline visualization assumes a graph where one root vertex has one or more connected vertices
  * which each has a text label and date property. These are then plotted onto a Javascript timeline
+ *
+ * The graph provided for this plugin should match the ASK query defined in askIfSupportedQuery
  */
 class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginView[rdf.Graph]("Timeline", prefixApplier)
 {
@@ -203,6 +205,27 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
         edges.size > 1 &&
             edges.exists(e => Edge.rdfDateTimeEdges.contains(e.uri)) &&
             edges.exists(e => Edge.rdfLabelEdges.contains(e.uri))
+    }
+
+    private def askIfSupportedQuery(): String = {
+        """PREFIX dc: <http://purl.org/dc/elements/1.1/>
+          |PREFIX dcterms: <http://purl.org/dc/terms/>
+          |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+          |ASK {
+          | {
+          |  ?s ?labelprop ?l .
+          |  ?s ?dateprop ?d .
+          |  FILTER(
+          |    (?labelprop = dc:title || ?labelprop = dcterms:title || ?labelprop = rdfs:label)
+          |    &&
+          |    (?dateprop = dc:date || ?dateprop = dcterms:date)
+          |  )
+          |  OPTIONAL {
+          |    ?legend ?labelprop ?ll .
+          |    ?s ?anyprop ?legend
+          |  }
+          | }
+          |}"""
     }
 
     override def isAvailable(availableTransformators: List[String], evaluationId: String,
