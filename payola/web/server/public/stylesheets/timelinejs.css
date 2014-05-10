@@ -1,0 +1,8 @@
+.vco-storyjs .dl-horizontal dt {
+    float: left;
+    width: 180px;
+}
+
+.vco-storyjs .dl-horizontal dd {
+    margin-left: 200px;
+}

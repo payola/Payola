@@ -86,51 +86,71 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
         List(wrapper)
     }
 
-    def findInitialVertex(g: Graph): Option[IdentifiedVertex] = {
-        val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
-        identifiedVertices.filter { v =>
-            val timelineVertices = g.getIncomingEdges(v.uri)
-            // The initial vertex should have no outgoing edges (tree root)
-            // Every timeline vertex should contain a date and title
+    /**
+     * @param g Graph
+     * @param events Event nodes
+     * @return If a vertex which has an incoming edge from all events exists and has a label, it is returned
+     */
+    def findLegendVertex(g: Graph, events: Seq[IdentifiedVertex]): Option[IdentifiedVertex] = {
+        val nonEventIdVertices = g.vertices
+            .filter(_.isInstanceOf[IdentifiedVertex])
+            .filterNot(events.contains(_))
+            .asInstanceOf[Seq[IdentifiedVertex]]
+        nonEventIdVertices.filter { v =>
+            log(v.uri)
+            // The initial vertex should have a label and all events should have an edge pointing to the root
             g.getOutgoingEdges(v.uri).find(e => Edge.rdfLabelEdges.contains(e.uri)).size > 0 &&
-                timelineVertices.size > 1 && timelineVertices.forall { e =>
-                e.origin match {
-                    case identified: IdentifiedVertex =>
-                        validateItemHasDateAndTitle(
-                            g.getOutgoingEdges(identified.uri)
-                        )
-
-                    case _ => false
-                }
+                events.forall { ev =>
+                    g.edges.exists(e => e.origin == ev && e.destination == v)
             }
         }.reduceOption((best, current) =>
-            if (g.getIncomingEdges(current.uri).size > g.getIncomingEdges(best.uri).size) current
+            if (g.getOutgoingEdges(current.uri).size > g.getOutgoingEdges(best.uri).size) current
             else best
         )
     }
 
-    private def setGraphContentWithInitialVertex(g: Graph, initialVertex: IdentifiedVertex) {
-        // Find event nodes (they point to the root node)
-        val events = g.getIncomingEdges(initialVertex.uri).map(_.origin)
-        val initialVertexOutgoing = g.getOutgoingEdges(initialVertex.uri)
-        legendTitle = initialVertexOutgoing
-            .find(e => Edge.rdfLabelEdges.contains(e.uri))
-            .map(e => e.destination.asInstanceOf[LiteralVertex].value.toString).getOrElse(initialVertex.uri)
-        legendDescription = htmlListFromEdges(initialVertexOutgoing)
+    private def fillTimelineDataSeries(g: Graph, events: Seq[IdentifiedVertex]) {
+
+        val edgeDestinationValue = (e: Option[Edge]) => {
+            e match {
+                case Some(edge) => edge.destination.asInstanceOf[LiteralVertex].value.toString
+                case None => ""
+            }
+        }
+
         val values = events.map { v =>
             // Each vertex should have an edge with the title and one with the date
             // Both edges point to literal vertices (due to prior assumed validations)
             // Apart from these two, other outgoing edges are added to the visualization
             val outgoingEdges = g.getOutgoingEdges(v.uri)
             val titleEdge = outgoingEdges.find(e => Edge.rdfLabelEdges.contains(e.uri))
-            val title: String = titleEdge.get.destination.asInstanceOf[LiteralVertex].value.toString
+            val title: String = edgeDestinationValue(titleEdge)
             val dateEdge = outgoingEdges.find(e => Edge.rdfDateTimeEdges.contains(e.uri))
-            val date: String = dateEdge.get.destination.asInstanceOf[LiteralVertex].value.toString
+            val date: String = edgeDestinationValue(dateEdge)
 
             val otherProps = outgoingEdges
                 .filter(e => e != dateEdge.get && e != titleEdge.get)
             List(title, date, htmlListFromEdges(otherProps)).toList
         }.toList
+
+        legendTitle = ""
+        legendDescription = ""
+        val legend = findLegendVertex(g, events)
+        if (legend.isDefined) {
+            val outgoingEdges = g.getOutgoingEdges(legend.get.uri)
+            val titleEdge = outgoingEdges.find(e => Edge.rdfLabelEdges.contains(e.uri))
+            legendTitle = edgeDestinationValue(titleEdge)
+            val descEdge = outgoingEdges.find(e => Edge.rdfDescriptionEdges.contains(e.uri))
+            // Use description node or list outgoing properties other than title
+            legendDescription = descEdge match {
+                case Some(edge) => edge.destination.asInstanceOf[LiteralVertex].value.toString
+                case None =>
+                    val otherProps = outgoingEdges
+                        .filter(_ != titleEdge.get)
+                    htmlListFromEdges(otherProps)
+            }
+        }
+
 
         dataSeries = values
     }
@@ -139,9 +159,11 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
         val stringified = edges
             .map(e => (e, e.destination))
             .map{
-            case (e: Edge, v: Vertex) => prefixApplier.get.applyPrefix(e.toString) + ": " + prefixApplier.get.applyPrefix(v.toString)
+            case (e: Edge, v: Vertex) =>
+                "<dt>%s</dt><dd>%s</dd>"
+                    .format(prefixApplier.get.applyPrefix(e.toString), prefixApplier.get.applyPrefix(v.toString))
         }
-        "<ul><li>" + stringified.mkString("</li>\n<li>") + "</li></ul>"
+        "<dl class=\"dl-horizontal\">" + stringified.mkString("\n") + "</dl>"
     }
 
     override def updateGraph(graph: Option[Graph], contractLiterals: Boolean = true) {
@@ -152,20 +174,33 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
             if (graph.isEmpty) {
                 renderMessage(timelineWrapper.htmlElement, "The graph is empty...")
             } else {
-                val initialVertex = findInitialVertex(graph.get)
-                log(graph.get.getIncomingEdges(initialVertex.get).size.toString)
-                if (initialVertex.isDefined) {
-                    setGraphContentWithInitialVertex(graph.get, initialVertex.get)
+                val events = findEventNodes(graph.get)
+                if (!events.isEmpty) {
+                    fillTimelineDataSeries(graph.get, events)
                 } else {
                     renderMessage(
                         timelineWrapper.htmlElement,
                         "This graph can't be displayed as a timeline",
-                        "Choose a different visualization plugin."
+                        "Choose a different visualization plugin or make sure it contains multiple vertices with a date and title."
                     )
                 }
             }
         }
         super.updateGraph(graph, contractLiterals = true)
+    }
+
+    /**
+     * Finds vertices which are event nodes, that it having a label and title
+     * @param g Graph
+     * @return Vertices which are event nodes
+     */
+    private def findEventNodes(g: Graph): Seq[IdentifiedVertex] = {
+        val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
+        identifiedVertices.filter { v =>
+            validateItemHasDateAndTitle(
+                g.getOutgoingEdges(v.uri)
+            )
+        }
     }
 
     /**
