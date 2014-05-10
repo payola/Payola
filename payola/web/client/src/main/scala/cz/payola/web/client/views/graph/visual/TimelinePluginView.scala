@@ -27,14 +27,6 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
     private var legendDescription = ""
     private var dataSeries = List[List[Any]]()
 
-    @javascript(
-        """
-          console.log(msg);
-        """)
-    private def log(msg: String) {
-
-    }
-
     /**
      * @param element Wrapper for timeline
      * @param arr Array of timeline events, each item is a list with the title, date and description
@@ -97,7 +89,6 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
             .filterNot(events.contains(_))
             .asInstanceOf[Seq[IdentifiedVertex]]
         nonEventIdVertices.filter { v =>
-            log(v.uri)
             // The initial vertex should have a label and all events should have an edge pointing to the root
             g.getOutgoingEdges(v.uri).find(e => Edge.rdfLabelEdges.contains(e.uri)).size > 0 &&
                 events.forall { ev =>
@@ -107,6 +98,20 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
             if (g.getOutgoingEdges(current.uri).size > g.getOutgoingEdges(best.uri).size) current
             else best
         )
+    }
+
+    /**
+     * Finds vertices which are event nodes, that it having a label and title
+     * @param g Graph
+     * @return Vertices which are event nodes
+     */
+    private def findEventNodes(g: Graph): Seq[IdentifiedVertex] = {
+        val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
+        identifiedVertices.filter { v =>
+            validateItemHasDateAndTitle(
+                g.getOutgoingEdges(v.uri)
+            )
+        }
     }
 
     private def fillTimelineDataSeries(g: Graph, events: Seq[IdentifiedVertex]) {
@@ -187,20 +192,6 @@ class TimelinePluginView(prefixApplier: Option[PrefixApplier]) extends PluginVie
             }
         }
         super.updateGraph(graph, contractLiterals = true)
-    }
-
-    /**
-     * Finds vertices which are event nodes, that it having a label and title
-     * @param g Graph
-     * @return Vertices which are event nodes
-     */
-    private def findEventNodes(g: Graph): Seq[IdentifiedVertex] = {
-        val identifiedVertices = g.vertices.filter(_.isInstanceOf[IdentifiedVertex]).asInstanceOf[Seq[IdentifiedVertex]]
-        identifiedVertices.filter { v =>
-            validateItemHasDateAndTitle(
-                g.getOutgoingEdges(v.uri)
-            )
-        }
     }
 
     /**
