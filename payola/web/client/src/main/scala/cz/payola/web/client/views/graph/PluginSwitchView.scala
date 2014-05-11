@@ -82,7 +82,8 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new ZoomableSunburst(Some(prefixApplier)),
         new ZoomableTreemap(Some(prefixApplier)),
         new DataCubeVisualizer(Some(prefixApplier)),
-        new ForceDirectGraph(Some(prefixApplier))
+        new ForceDirectGraph(Some(prefixApplier)),
+        new TimelinePluginView(Some(prefixApplier))
     )
 
     /**

@@ -6,7 +6,18 @@ object Edge
 
     val rdfLabelEdges = List(
         "http://www.w3.org/2000/01/rdf-schema#label",
-        "http://purl.org/dc/terms/title"
+        "http://purl.org/dc/terms/title",
+        "http://purl.org/dc/elements/1.1/title"
+    )
+
+    val rdfDescriptionEdges = List(
+        "http://purl.org/dc/terms/description",
+        "http://purl.org/dc/elements/1.1/description"
+    )
+
+    val rdfDateTimeEdges = List(
+        "http://purl.org/dc/terms/date",
+        "http://purl.org/dc/elements/1.1/date"
     )
 }
 
