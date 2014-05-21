@@ -63,6 +63,7 @@ class ColumnChartPluginView(prefixApplier: Option[PrefixApplier]) extends Plugin
                     clickable: true
                 }
           };
+          console.log(element);
           $.plot(element, data, options);
         """)
     private def createDataTable(element: Element, arr: List[List[Any]], legendTitle: String) {

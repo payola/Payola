@@ -665,4 +665,8 @@ button.datacube {
     overflow: scroll;
 }
 
+#chart-wrapper{
+    min-height: 350px;
+}
+
 
