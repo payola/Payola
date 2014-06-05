@@ -198,27 +198,32 @@ trait DataCubeModelComponent
                   |     ?c3 qb:attribute ?a ;
                   |         rdfs:label ?lattr ;
                   |         qb:order ?aOrder .
-                  | } WHERE {
-                  |     ?d a qb:DataStructureDefinition .
-                  |     ?d qb:component ?c .
-                  |     ?c qb:dimension ?dim ;
-                  |         rdfs:label ?l ;
-                  |         qb:order ?dimOrder .
-                  |     ?d qb:component ?c2 .
-                  |     ?c2 qb:measure ?m ;
-                  |         rdfs:label ?l2 .
-                  |
-                  |     OPTIONAL { ?m qb:order ?mOrder . }
-                  |     OPTIONAL {
-                  |         ?d qb:component ?c3 .
-                  |         ?c3 qb:attribute ?a ;
-                  |             rdfs:label ?lattr ;
-                  |             qb:order ?aOrder .
-                  |     }
-                  |
-                  |     OPTIONAL { ?dim qb:concept ?concept . }
-                  |     OPTIONAL { ?d rdfs:label ?dsdLabel . FILTER(LANG(?dsdLabel) = 'en') }
-                  | }
+                  | } WHERE
+                  |  { {
+                  |    ?d <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> qb:DataStructureDefinition .
+                  |    ?d qb:component ?c .
+                  |    ?c qb:dimension ?dim .
+                  |    ?c rdfs:label ?l .
+                  |    ?c qb:order ?dimOrder .
+                  |    ?d qb:component ?c2 .
+                  |    ?c2 qb:measure ?m .
+                  |    ?c2 rdfs:label ?l2
+                  |    }
+                  |    UNION
+                  |      { ?m qb:order ?mOrder }
+                  |    UNION
+                  |      { ?d qb:component ?c3 .
+                  |        ?c3 qb:attribute ?a .
+                  |        ?c3 rdfs:label ?lattr .
+                  |        ?c3 qb:order ?aOrder
+                  |      }
+                  |    UNION
+                  |      { ?dim qb:concept ?concept }
+                  |    UNION
+                  |      { ?d rdfs:label ?dsdLabel
+                  |        FILTER ( lang(?dsdLabel) = "en" )
+                  |      }
+                  |  }
                 """.stripMargin
         }
 }
