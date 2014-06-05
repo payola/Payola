@@ -170,6 +170,9 @@ angular.module('dataCube.controllers', []).
                                                     var o = solution[URI_value][0];
                                                     res.uri = o.value;
                                                 }
+                                                if (solution[URI_variable][0].value == "dtl") {
+                                                    res.prefLabel = solution[URI_value][0].value;
+                                                }
                                                 if (solution[URI_variable][0].value == "spl") {
                                                     res.prefLabel = solution[URI_value][0].value;
                                                 }
@@ -345,6 +348,9 @@ angular.module('dataCube.controllers', []).
             });
             var promises = [];
 
+            $scope.seriesIndices = {};
+            var max = 0;
+
             angular.forEach(valuesCopy, function (v) {
 
                 if (!v.active) return;
@@ -354,9 +360,6 @@ angular.module('dataCube.controllers', []).
                 ], true));
 
                 globalFilters = globalFilters.concat(localFilters);
-
-                $scope.seriesIndices = {};
-                var max = 0;
 
                 var serie = {name: v.prefLabel || v.uri || v.value, data: []};
                 $scope.highcharts.series.push(serie);

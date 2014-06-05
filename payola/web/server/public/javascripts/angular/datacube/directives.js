@@ -147,6 +147,9 @@ angular.module('dataCube.directives', [])
             }
 
             function settingsChanged() {
+                if(!scope.data || ! scope.data.data[0]){
+                    return;
+                }
 
                 var dataObject = scope.data.data[0].data;
                 var newData = new Array();
@@ -157,6 +160,7 @@ angular.module('dataCube.directives', [])
 
                     for (var i = 0; i < dataObject.length; i++) {
                         var curObj = dataObject[i];
+                        if(!curObj.tickValue) return;
                         var lau = curObj.tickValue.substr(curObj.tickValue.lastIndexOf("/") + 1);
                         newData.push([lau, curObj.y])
                     }

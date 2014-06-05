@@ -109,11 +109,13 @@ trait DataCubeModelComponent
                     """
                       | PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                       | PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                      | PREFIX dcterms: <http://purl.org/dc/terms/>
                       |
-                      | SELECT DISTINCT ?o ?spl ?l ?sn ?date
+                      | SELECT DISTINCT ?o ?spl ?l ?dtl ?sn ?date
                       | WHERE {
                       |    ?x <%s> ?d .
                       |    OPTIONAL { ?d skos:prefLabel ?spl . }
+                      |    OPTIONAL { ?d dcterms:title ?dtl . }
                       |    OPTIONAL { ?d rdfs:label ?l . FILTER (LANG(?l) = 'en') }
                       |    OPTIONAL { ?d skos:notion ?sn . }
                       |    BIND(substr(str(?d),1,4) AS ?o)
@@ -127,11 +129,13 @@ trait DataCubeModelComponent
                     """
                       | PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                       | PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                      | PREFIX dcterms: <http://purl.org/dc/terms/>
                       |
-                      | SELECT DISTINCT ?o ?l ?spl ?sn WHERE {
+                      | SELECT DISTINCT ?o ?l ?spl ?dtl ?sn WHERE {
                       |     [] <%s> ?o .
                       |
                       |     OPTIONAL { ?o skos:prefLabel ?spl . }
+                      |     OPTIONAL { ?d dcterms:title ?dtl . }
                       |     OPTIONAL { ?o rdfs:label ?l . FILTER (LANG(?l) = 'en') }
                       |     OPTIONAL { ?o skos:notion ?sn . }
                       |
