@@ -32,8 +32,9 @@ angular.module('dataCube.controllers', []).
         $scope.mapVisible = false;
         $scope.chartVisible = true;
 
-        $scope.showMap = function(){ $scope.mapVisible = true; $scope.chartVisible = false; };
-        $scope.showChart = function(){ $scope.mapVisible = false; $scope.chartVisible = true; };
+        $scope.showMap = function(){ $scope.euMapVisible = false; $scope.mapVisible = true; $scope.chartVisible = false; };
+        $scope.showEuMap = function(){ $scope.euMapVisible = true; $scope.chartVisible = false; $scope.mapVisible = false; };
+        $scope.showChart = function(){ $scope.euMapVisible = false; $scope.mapVisible = false; $scope.chartVisible = true; };
 
         $scope.czRegionData = {title:"Mapdata", data: []};
 
