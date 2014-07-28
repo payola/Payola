@@ -69,6 +69,10 @@
           <option name="WRAP_LONG_LINES" value="true" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
+        <codeStyleSettings language="HOCON">
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
         <codeStyleSettings language="JAVA">
           <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="0" />
           <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
