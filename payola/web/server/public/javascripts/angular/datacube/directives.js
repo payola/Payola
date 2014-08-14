@@ -438,15 +438,15 @@ angular.module('dataCube.directives', [])
                 [275, 'SE33'], [276, 'SE32'], [277, 'SE31'], [278, 'SE23'], [279, 'SE12'], [280, 'SE21'], [281, 'SE22'], [282, 'SE11'], [283, 'SE21'],
                 [284, 'UKH3'], [285, 'UKI2'], [286, 'UKI1'], [287, 'CZ02'], [288, 'HR01'], [289, 'HR02'], [290, 'HR03'], [291, 'CZ01'],
                 [292, 'RO21'], [293, 'RO22'], [294, 'RO31'], [295, 'RO32'],
-                [296, 'ITD2'], [297, 'ITD1']];
+                [296, 'ITD2'], [297, 'ITD1'], [298, 'PL12']];
             function getVal(value1, value2) {
                 switch (scope.dataOperation.id) {
-                    case 0:
-                        return value2 - value1;
-                    case 1:
-                        return value2 / value1;
-                    case 2:
-                        return value1 + value2;
+                case 0:
+                    return value2 - value1;
+                case 1:
+                    return value2 / value1;
+                case 2:
+                    return value1 + value2;
                 }
             }
             function numberWithCommas(x) {
@@ -506,7 +506,7 @@ angular.module('dataCube.directives', [])
                 scope.$apply();
             }
             /*function RegionClick(object) {
-             }*/
+            }*/
             function getRegionName(id) {
                 var i;
                 for (i = 0; i < mapping.length; i += 3) {
@@ -522,7 +522,11 @@ angular.module('dataCube.directives', [])
                     reg = el[i].getAttribute("nuts");
                     if (reg === nuts) {
                         el[i].setAttribute("stroke", "yellow");
-                        el[i].setAttribute("stroke-width", "3px");
+                        if (scope.pollandOnly) {
+                            el[i].setAttribute("stroke-width", "1px");
+                        } else {
+                            el[i].setAttribute("stroke-width", "3px");
+                        }
                     }
                 }
                 scope.ttLeft = e.pageX + 20 - 400;
@@ -563,7 +567,7 @@ angular.module('dataCube.directives', [])
                 var tmp = id, i, el;
                 if (id === null || id === undefined) {
                     id = getRegionId(tmp);
-                }
+                }                
                 if (value === null || value === undefined) {
                     value = "";
                 }
@@ -631,9 +635,13 @@ angular.module('dataCube.directives', [])
                 for (id = 0; id < mapping.length; id += 3) {
                     setRegionColor(mapping[id + 2],  "#aaaaaa");
                 }
+                scope.pollandOnly = true;
                 for (id = 0; id < list.length; id += 1) {
+                    if (list[id][indexId].substr(0, 2).toUpperCase() !== "PL") {
+                        scope.pollandOnly = false;
+                    }
                     setRegionColor(list[id][indexId],  getColor(range, list[id][indexData]), list[id][indexData],
-                        list[id][indexData + 1]);
+                        list[id][indexData + 1], list[id][indexData + 2]);
                 }
                 scope.$apply();
             }
@@ -645,7 +653,7 @@ angular.module('dataCube.directives', [])
                     for (i = 0; i < dataObject.length; i += 1) {
                         curObj = dataObject[i];
                         lau = curObj.tickValue.substr(curObj.tickValue.lastIndexOf("/") + 1);
-                        newData.push([lau, curObj.y]);
+                        newData.push([lau, curObj.y, curObj.label]);
                     }
                 } else {
                     dataObj1 = scope.data.data[scope.dataSet1.id].data;
@@ -669,11 +677,12 @@ angular.module('dataCube.directives', [])
                 scope.mapMode = 0;
                 scope.showSimple = 1;
                 scope.dataSets = [];
+                scope.pollandOnly = true;
                 scope.dataOperations = [
                     {name: 'Difference', id: 0},
                     {name: 'Ratio', id: 1},
                     {name: 'Sum', id: 2}
-                ];
+                ];                
                 scope.dataOperation = scope.dataOperations[0];
                 if (scope.data.data.length > 1) {
                     scope.hideOptions = false;
@@ -735,11 +744,11 @@ angular.module('dataCube.directives', [])
                 element.find("select").on("change", function () {
                     settingsChanged();
                 });
-                /*            element.find("path").on("click", function () {
-                 if (this.getAttribute("ignore") != "1") {
-                 //RegionClick(this);
-                 }
-                 });*/
+    /*            element.find("path").on("click", function () {
+                    if (this.getAttribute("ignore") != "1") {
+                        //RegionClick(this);
+                    }
+                });*/
                 element.find("path").on("mouseleave", function () {
                     if (this.getAttribute("ignore") !== "1") {
                         regionOut(this);
