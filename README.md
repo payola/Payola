@@ -1,6 +1,5 @@
 <a name="top"></a>
 
-
 ![Payola logo (credits Martin Mraz)](https://raw.github.com/siroky/Payola/develop/docs/img/logo_medium.png)
 
 Payola is an HTML5 web application which lets you work with graph data in a completely new way. You can visualize [Linked Data](http://linkeddata.org/) using several preinstalled plugins as graphs, tables, etc. This also means, that you no longer need [Pubby](http://www4.wiwiss.fu-berlin.de/pubby/) to browse through a Linked Data storage (via its [SPARQL](http://www.w3.org/TR/rdf-sparql-query/) endpoint). Moreover, you can create an analysis and run it against a set of SPARQL endpoints without deep knowledge of SPARQL language itself. Analysis results are processed and visualized using the embedded visualization plugins.
@@ -12,6 +11,9 @@ For more information about functions and features of the Payola, please refer to
 ## Ready to give it a try? See our sample visualizations
 - [Map visualization](http://vis.payola.cz/coi-gmaps) - Inspections of [CTIA](http://www.coi.cz/en/) - Czech Trade Inspection Agency - shown on a Google map with filtering capabilities
 - [Treemap](http://vis.payola.cz/coi-treemap) - Inspections of [CTIA](http://www.coi.cz/en/) - Czech Trade Inspection Agency - by regions with sanction amount
+
+## Interested in LinkedData visualization?
+See our [new app - payola-viz](https://github.com/payola/payola-viz)
 
 ## Should you be interested in Payola?
 
