@@ -12,7 +12,7 @@ class DataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None) extends Pl
     def supportedDataFormat: String = "RDF/JSON"
 
     @javascript(
-        """ console.log("red"); location.href = '/visualize/datacube/'+evaluationId; """)
+        """ location.href = 'http://live.payola.cz:29080/api/visualization/payola/'+evaluationId; """)
     def redirect(evaluationId: String) {}
 
     def createSubViews = {
