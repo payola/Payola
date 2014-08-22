@@ -112,7 +112,9 @@ abstract class SigmaPluginView(name: String, prefixApplier: Option[PrefixApplier
 
         parentElement.foreach(updateSigmaPluginSize(_))
 
-        if (!sigmaInstance.isEmpty && graph.isEmpty) {
+        if (sigmaInstance.isEmpty && graph.isEmpty) {
+            //renderMessage(sigmaPluginWrapper.htmlElement, "The graph is empty...")
+        } else {
             if(sigmaInstance.isDefined) {
                 clearGraph()
             }
