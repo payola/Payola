@@ -73,7 +73,7 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new ColumnChartPluginView(Some(prefixApplier)),
         new GraphSigmaPluginView(Some(prefixApplier)),
         new TimeHeatmap(Some(prefixApplier)),
-        new Generic(Some(prefixApplier)),
+        //new Generic(Some(prefixApplier)),
         new GoogleMapView(Some(prefixApplier)),
         new GoogleHeatMapView(Some(prefixApplier)),
         new ArcGisMapView(Some(prefixApplier)),
@@ -81,9 +81,9 @@ class PluginSwitchView(prefixApplier: PrefixApplier, startEvaluationId: Option[S
         new Sunburst(Some(prefixApplier)),
         new ZoomableSunburst(Some(prefixApplier)),
         new ZoomableTreemap(Some(prefixApplier)),
-        new DataCubeVisualizer(Some(prefixApplier)),
         new ForceDirectGraph(Some(prefixApplier)),
-        new TimelinePluginView(Some(prefixApplier))
+        new TimelinePluginView(Some(prefixApplier)),
+        new DataCubeVisualizer(Some(prefixApplier))
     )
 
     /**
