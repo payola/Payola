@@ -3,7 +3,6 @@ package cz.payola.web.client.views.datacube
 import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
-import s2js.runtime.client.scala.Option
 
 class ClientDataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None)
     extends PluginView[String]("DataCube", prefixApplier)
