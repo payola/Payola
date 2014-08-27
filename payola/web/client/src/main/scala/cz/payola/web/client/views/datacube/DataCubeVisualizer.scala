@@ -7,7 +7,7 @@ import cz.payola.web.client.models.PrefixApplier
 import cz.payola.web.shared.transformators.RdfJsonTransformator
 import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
 
-class DataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("DataCube [JS]", prefixApplier)
+class DataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("DataCube", prefixApplier)
 {
     def supportedDataFormat: String = "RDF/JSON"
 

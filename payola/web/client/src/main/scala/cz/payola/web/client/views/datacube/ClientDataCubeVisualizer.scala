@@ -5,7 +5,7 @@ import cz.payola.web.client.views.graph.PluginView
 import s2js.compiler.javascript
 
 class ClientDataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None)
-    extends PluginView[String]("DataCube", prefixApplier)
+    extends PluginView[String]("DataCube [JS]", prefixApplier)
 {
     def supportedDataFormat: String = "RDF/JSON"
 
