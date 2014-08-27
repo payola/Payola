@@ -1,18 +1,17 @@
 package cz.payola.web.client.views.datacube
 
-import s2js.adapters.html
-import s2js.compiler.javascript
-import cz.payola.web.client.views.graph.PluginView
 import cz.payola.web.client.models.PrefixApplier
-import cz.payola.web.shared.transformators.RdfJsonTransformator
-import cz.payola.web.client.views.bootstrap.modals.FatalErrorModal
+import cz.payola.web.client.views.graph.PluginView
+import s2js.compiler.javascript
+import s2js.runtime.client.scala.Option
 
-class DataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None) extends PluginView[String]("DataCube [JS]", prefixApplier)
+class ClientDataCubeVisualizer(prefixApplier: Option[PrefixApplier] = None)
+    extends PluginView[String]("DataCube", prefixApplier)
 {
     def supportedDataFormat: String = "RDF/JSON"
 
     @javascript(
-        """ location.href = 'http://live.payola.cz:29080/api/visualization/payola/'+evaluationId; """)
+        """ console.log("red"); location.href = '/visualize/datacube/'+evaluationId; """)
     def redirect(evaluationId: String) {}
 
     def createSubViews = {
